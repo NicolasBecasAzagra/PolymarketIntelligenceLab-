@@ -13,10 +13,10 @@ This file tracks the high-level roadmap and current global state of the project.
 
 ### Week 2: Features & Baselines
 - [x] Feature engineering (`src/features`).
-- [ ] Baselines clásicos (`src/models/baselines`).
-- [ ] Anomaly detection implementado.
-- [ ] Primer ranking heurístico de oportunidades.
-- [ ] Backtesting inicial funcionando.
+- [x] Baselines clásicos (`src/models/baselines`).
+- [x] Anomaly detection implementado.
+- [x] Primer ranking heurístico de oportunidades.
+- [x] Backtesting inicial funcionando (simulado mediante exportación cross-sectional).
 
 ### Week 3: Advanced Models & Explainability
 - [ ] Modelos avanzados time-series (`src/models/time_series`).
