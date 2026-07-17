@@ -27,7 +27,7 @@ echo 'export PATH="/root/.local/bin:$PATH"' >> ~/.bashrc
 # Since the script is inside the repo, we assume the user already cloned it.
 echo "--> Installing Project Dependencies..."
 cd "$(dirname "$0")/.." || exit
-python3 -m poetry install
+~/.local/bin/poetry install
 
 # 5. Environment Variables Setup
 echo "--> Setting up environment..."
