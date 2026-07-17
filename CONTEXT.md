@@ -7,10 +7,17 @@ Una plataforma end-to-end que ingiere datos de mercado, order book y contexto te
 
 Combina Data Engineering, Machine Learning, LLMs, Backend/API, Dashboard, evaluación científica y opcionalmente ejecución simulada o paper trading.
 
-## ✨ Lo que lo hace especial (Diferenciadores)
-La innovación no es "usar ChatGPT para resumir mercados". Es combinar **señales estructuradas + texto + explicabilidad + evaluación rigurosa**. 
-- Demostrar una arquitectura comparativa real.
-- Integrar series temporales, texto y razonamiento explicable.
+## ✨ Lo Qué lo haría especial
+La parte innovadora no sería “usar ChatGPT para resumir mercados”. La gracia estaría en combinar señales estructuradas + texto + explicabilidad + evaluación rigurosa, porque la literatura reciente sobre forecasting financiero con LLMs insiste justo en el valor de integrar series temporales, texto y razonamiento explicable
+
+---
+
+## 🦍 Beast Mode (Institutional Grade Vision)
+El proyecto ha evolucionado de un simple analizador a una arquitectura de nivel institucional. El objetivo a medio plazo incluye:
+1. **Self-Learning MLOps Loop:** El modelo no usará reglas fijas, sino que se re-entrenará automáticamente cada semana con los datos de los mercados cerrados para descubrir qué patrones anticiparon a los ganadores, volviéndose más inteligente cada día.
+2. **Order Book Ingestion (Nivel 2):** Conexión en vivo al Libro de Órdenes (Bid/Ask) para detectar "ballenas" y capitales ocultos (Spoofing/Iceberg orders) antes de que impacten en el precio.
+3. **NLP (News & Twitter Sentiment):** Extracción en tiempo real de sentimiento social y cruce con el volumen de mercado.
+4. **Deep Learning Transformers:** Sustituir baselines clásicos por arquitecturas SOTA de series temporales (PatchTST o N-BEATS) para predicción de secuencias a futuro..
 - Reconocer que distintos modelos funcionan mejor según el contexto y la volatilidad.
 
 ### Arquitectura Comparativa
