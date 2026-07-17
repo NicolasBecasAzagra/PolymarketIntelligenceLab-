@@ -1,0 +1,42 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Data
+data/raw/
+data/processed/
+data/models/
+*.parquet
+*.csv
+*.db
+*.duckdb
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+
+# MLflow / W&B
+mlruns/
+wandb/
+
+# Logs
+logs/
+*.log
+
+# Frontend (Next.js)
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
