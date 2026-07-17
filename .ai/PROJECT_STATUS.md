@@ -12,7 +12,7 @@ This file tracks the high-level roadmap and current global state of the project.
 - [x] Primer dataset analítico generado.
 
 ### Week 2: Features & Baselines
-- [ ] Feature engineering (`src/features`).
+- [x] Feature engineering (`src/features`).
 - [ ] Baselines clásicos (`src/models/baselines`).
 - [ ] Anomaly detection implementado.
 - [ ] Primer ranking heurístico de oportunidades.

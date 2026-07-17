@@ -1,4 +1,4 @@
-.PHONY: install test lint format run-api run-frontend run-ingestion
+.PHONY: install test lint format run-api run-frontend run-ingestion run-features
 
 install:
 	python3 -m poetry install
@@ -22,3 +22,6 @@ run-frontend:
 
 run-ingestion:
 	python3 -m poetry run python -m src.ingestion.run_ingestion
+
+run-features:
+	python3 -m poetry run python -m src.features.run_features
