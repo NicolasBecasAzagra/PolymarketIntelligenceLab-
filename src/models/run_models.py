@@ -8,6 +8,7 @@ import mlflow
 
 from src.models.baselines.anomaly_detector import MarketAnomalyDetector
 from src.models.baselines.opportunity_ranker import OpportunityRanker
+from src.models.llm.research_generator import ResearchGenerator
 
 logging.basicConfig(
     level=logging.INFO,
@@ -52,8 +53,32 @@ def main():
             mlflow.log_param("ranker_model", "XGBRegressor")
             mlflow.log_param("ranker_n_estimators", ranker.model.n_estimators)
             
+            # 3. Explainability (SHAP)
+            shap_df = ranker.get_shap_explanations(df)
+            if not shap_df.empty:
+                df = pd.concat([df, shap_df], axis=1)
+            
             # Sort by opportunity score
             df = df.sort_values(by="opportunity_score", ascending=False)
+            
+            # 4. Generate Research Notes (LLM)
+            logger.info("Generating Research Notes for Top 3 Markets...")
+            generator = ResearchGenerator()
+            df['research_note'] = "Not generated"
+            
+            for i in range(min(3, len(df))):
+                idx = df.index[i]
+                row = df.loc[idx]
+                title = row.get('title', 'Unknown Market')
+                metrics = {
+                    'volume': row.get('volume', 0),
+                    'liquidity': row.get('liquidity', 0),
+                    'velocity_24h': row.get('velocity_24h', 0)
+                }
+                shap_vals = {c: row[c] for c in shap_df.columns} if not shap_df.empty else {}
+                
+                note = generator.generate_note(title, metrics, shap_vals)
+                df.at[idx, 'research_note'] = note
             
             # Log top 1 opportunity score as a metric
             top_score = float(df['opportunity_score'].iloc[0]) if not df.empty else 0.0
@@ -68,7 +93,7 @@ def main():
             filepath = os.path.join(output_dir, filename)
             
             # Save top 50 (or all if <50) for inspection, selecting readable columns
-            display_cols = ['id', 'title', 'volume', 'liquidity', 'is_anomaly', 'anomaly_score', 'opportunity_score']
+            display_cols = ['id', 'title', 'volume', 'liquidity', 'is_anomaly', 'opportunity_score', 'research_note']
             available_cols = [c for c in display_cols if c in df.columns]
             df[available_cols].head(50).to_csv(filepath, index=False)
             

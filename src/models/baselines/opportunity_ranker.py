@@ -2,6 +2,7 @@ import logging
 import pandas as pd
 import numpy as np
 import xgboost as xgb
+import shap
 
 logger = logging.getLogger(__name__)
 
@@ -53,3 +54,22 @@ class OpportunityRanker:
         df['opportunity_score'] = scores
         
         return df
+
+    def get_shap_explanations(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Calculates SHAP values for the features to explain the predictions.
+        Returns a DataFrame with the SHAP value for each feature.
+        """
+        logger.info("Calculating SHAP values...")
+        available_features = [c for c in self.feature_cols if c in df.columns]
+        X = df[available_features].fillna(0.0)
+        
+        if X.empty:
+            return pd.DataFrame()
+            
+        explainer = shap.TreeExplainer(self.model)
+        shap_values = explainer.shap_values(X)
+        
+        # Create a dataframe of SHAP values with prefix 'shap_'
+        shap_df = pd.DataFrame(shap_values, columns=[f"shap_{c}" for c in available_features], index=df.index)
+        return shap_df

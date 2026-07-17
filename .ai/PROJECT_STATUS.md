@@ -20,8 +20,8 @@ This file tracks the high-level roadmap and current global state of the project.
 
 ### Week 3: Advanced Models & Explainability
 - [ ] Modelos avanzados time-series (`src/models/time_series`).
-- [ ] Capa textual/LLM integrada (`src/models/llm`).
-- [ ] Explainability (SHAP + LLM summaries).
+- [x] Capa textual/LLM integrada (`src/models/llm`).
+- [x] Explainability (SHAP + LLM summaries).
 - [ ] Ablation studies y benchmarks completados.
 
 ### Week 4: Serving & Demo
