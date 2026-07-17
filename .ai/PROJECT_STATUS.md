@@ -6,10 +6,10 @@ This file tracks the high-level roadmap and current global state of the project.
 
 ### Week 1: Architecture & Ingestion
 - [x] Diseñar arquitectura de carpetas y repositorios.
-- [ ] Cerrar fuentes de datos (Polymarket API, News).
-- [ ] Implementar ingesta robusta (`src/ingestion`).
-- [ ] Esquema Bronze/Silver/Gold (Parquet/DuckDB).
-- [ ] Primer dataset analítico generado.
+- [x] Cerrar fuentes de datos (Polymarket API, News).
+- [x] Implementar ingesta robusta (`src/ingestion`).
+- [x] Esquema Bronze/Silver/Gold (Parquet/DuckDB).
+- [x] Primer dataset analítico generado.
 
 ### Week 2: Features & Baselines
 - [ ] Feature engineering (`src/features`).
