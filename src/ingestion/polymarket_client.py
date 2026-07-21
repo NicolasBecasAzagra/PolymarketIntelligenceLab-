@@ -11,6 +11,7 @@ class PolymarketClient:
     We start with the Gamma API to fetch active events and their metadata.
     """
     GAMMA_API_URL = "https://gamma-api.polymarket.com"
+    CLOB_API_URL = "https://clob.polymarket.com"
 
     def __init__(self):
         self.session = requests.Session()
@@ -40,3 +41,19 @@ class PolymarketClient:
         except RequestException as e:
             logger.error(f"Error fetching data from Polymarket API: {e}")
             raise
+
+    def fetch_order_book(self, token_id: str) -> Dict[str, Any]:
+        """
+        Fetches the L2 Order Book (Bids and Asks) for a specific CLOB token ID.
+        """
+        endpoint = f"{self.CLOB_API_URL}/book"
+        params = {"token_id": token_id}
+        
+        try:
+            response = self.session.get(endpoint, params=params, timeout=5)
+            response.raise_for_status()
+            return response.json()
+        except RequestException as e:
+            logger.debug(f"Could not fetch order book for token {token_id}: {e}")
+            # Return an empty structure if it fails (market might be closed or invalid token)
+            return {"bids": [], "asks": []}

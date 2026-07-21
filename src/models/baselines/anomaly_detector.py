@@ -17,7 +17,8 @@ class MarketAnomalyDetector:
         )
         self.feature_cols = [
             'velocity_24h', 'velocity_1wk', 
-            'liquidity_to_oi_ratio', 'comments_per_1k_volume'
+            'liquidity_to_oi_ratio', 'comments_per_1k_volume',
+            'bid_ask_spread', 'liquidity_imbalance', 'whale_wall_size'
         ]
 
     def fit_predict(self, df: pd.DataFrame) -> pd.DataFrame:

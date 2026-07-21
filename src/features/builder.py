@@ -1,7 +1,7 @@
 import logging
 import pandas as pd
 import numpy as np
-
+import json
 logger = logging.getLogger(__name__)
 
 class FeatureBuilder:
@@ -52,6 +52,57 @@ class FeatureBuilder:
         if 'commentCount' in features.columns and 'volume' in features.columns:
             # Lots of comments but zero volume = noise/meme market. High volume + low comments = institutional/whale.
             features['comments_per_1k_volume'] = (features['commentCount'] * 1000) / (features['volume'] + EPSILON)
+
+        # 5. Order Book L2 Features (Whale Detection & Microstructure)
+        def process_order_book(row):
+            metrics = {
+                'bid_ask_spread': 1.0, 
+                'liquidity_imbalance': 0.5, 
+                'whale_wall_size': 0.0
+            }
+            try:
+                bids_str = row.get('order_book_bids', "[]")
+                asks_str = row.get('order_book_asks', "[]")
+                
+                bids = json.loads(bids_str) if isinstance(bids_str, str) else bids_str
+                asks = json.loads(asks_str) if isinstance(asks_str, str) else asks_str
+                
+                if not isinstance(bids, list) or not isinstance(asks, list):
+                    return pd.Series(metrics)
+
+                # Convert to float
+                bids = [{'price': float(b.get('price', 0)), 'size': float(b.get('size', 0))} for b in bids if 'price' in b and 'size' in b]
+                asks = [{'price': float(a.get('price', 0)), 'size': float(a.get('size', 0))} for a in asks if 'price' in a and 'size' in a]
+                
+                bids = sorted(bids, key=lambda x: x['price'], reverse=True) # Highest bid first
+                asks = sorted(asks, key=lambda x: x['price']) # Lowest ask first
+                
+                if bids and asks:
+                    best_bid = bids[0]['price']
+                    best_ask = asks[0]['price']
+                    metrics['bid_ask_spread'] = max(best_ask - best_bid, 0)
+                
+                # Imbalance: total bid size vs total ask size
+                total_bid_size = sum(b['size'] for b in bids)
+                total_ask_size = sum(a['size'] for a in asks)
+                total_size = total_bid_size + total_ask_size
+                if total_size > 0:
+                    metrics['liquidity_imbalance'] = total_bid_size / total_size
+                    
+                # Whale walls: find max single order size
+                max_bid = max([b['size'] for b in bids]) if bids else 0
+                max_ask = max([a['size'] for a in asks]) if asks else 0
+                metrics['whale_wall_size'] = max(max_bid, max_ask)
+                
+            except Exception as e:
+                logger.debug(f"Error parsing order book: {e}")
+                
+            return pd.Series(metrics)
+
+        if 'order_book_bids' in features.columns and 'order_book_asks' in features.columns:
+            logger.info("Extracting L2 Order Book features (Spread, Imbalance, Whale Walls)...")
+            l2_features = features.apply(process_order_book, axis=1)
+            features = pd.concat([features, l2_features], axis=1)
 
         # Drop complex types (like raw dicts/lists or datetime) before saving to Parquet for ML
         cols_to_drop = [c for c in features.columns if features[c].dtype == 'object' or features[c].dtype == 'datetime64[ns, UTC]']
