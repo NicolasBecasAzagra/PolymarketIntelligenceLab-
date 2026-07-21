@@ -35,7 +35,7 @@ export default function Dashboard() {
         return res.json();
       })
       .then((data) => {
-        if (data.status === "success" && Array.isArray(data.data)) {
+        if (Array.isArray(data.data)) {
           // Explicitly sort by master_score or opportunity_score descending
           const sorted = data.data.sort((a: any, b: any) => {
             const scoreA = a.master_score ?? a.opportunity_score ?? 0;
