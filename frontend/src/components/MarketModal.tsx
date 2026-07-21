@@ -79,7 +79,7 @@ export default function MarketModal({ marketId, title, onClose }: MarketModalPro
                   <LineChart data={history}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                     <XAxis dataKey="timeLabel" stroke="#a1a1aa" fontSize={12} />
-                    <YAxis yAxisId="left" stroke="#8b5cf6" fontSize={12} domain={[0, 100]} />
+                    <YAxis yAxisId="left" stroke="#8b5cf6" fontSize={12} domain={['auto', 'auto']} />
                     <YAxis yAxisId="right" orientation="right" stroke="#10b981" fontSize={12} domain={[0, 100]} unit="%" />
                     <Tooltip 
                       contentStyle={{ backgroundColor: 'rgba(10,10,10,0.9)', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '8px' }}

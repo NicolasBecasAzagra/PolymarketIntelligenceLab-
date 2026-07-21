@@ -5,6 +5,9 @@ import logging
 import pandas as pd
 from datetime import datetime
 import mlflow
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from src.models.baselines.anomaly_detector import MarketAnomalyDetector
 from src.models.baselines.opportunity_ranker import OpportunityRanker

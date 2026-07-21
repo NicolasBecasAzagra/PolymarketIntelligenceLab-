@@ -124,12 +124,16 @@ export default function Dashboard() {
               {/* L2 Order Book Depth */}
               <div>
                 <div style={{display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-secondary)'}}>
-                  <span>L2 Bids</span>
-                  <span>L2 Asks</span>
+                  <span>L2 Bids (Compradores)</span>
+                  <span>L2 Asks (Vendedores)</span>
                 </div>
-                <div className="l2-bar-container">
-                  <div className="l2-bids" style={{ width: `${bidPct}%` }}></div>
-                  <div className="l2-asks" style={{ width: `${askPct}%` }}></div>
+                <div className="l2-bar-container" style={{ position: 'relative' }}>
+                  <div className="l2-bids" style={{ width: `${bidPct}%`, display: 'flex', alignItems: 'center', paddingLeft: '4px', fontSize: '0.65rem', color: 'rgba(255,255,255,0.7)' }}>
+                    {bidPct > 15 ? `${bidPct.toFixed(0)}%` : ''}
+                  </div>
+                  <div className="l2-asks" style={{ width: `${askPct}%`, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: '4px', fontSize: '0.65rem', color: 'rgba(255,255,255,0.7)' }}>
+                    {askPct > 15 ? `${askPct.toFixed(0)}%` : ''}
+                  </div>
                 </div>
               </div>
             </div>
