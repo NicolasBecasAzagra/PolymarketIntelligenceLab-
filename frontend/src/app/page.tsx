@@ -22,8 +22,8 @@ export default function Dashboard() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // Fetch all opportunities (limit = 1000 to get "all")
-    fetch("http://localhost:8000/api/opportunities?limit=1000")
+    // Fetch all opportunities through Next.js proxy
+    fetch("/api/opportunities?limit=1000")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch data from API");
         return res.json();
