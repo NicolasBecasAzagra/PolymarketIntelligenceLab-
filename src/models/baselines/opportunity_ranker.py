@@ -64,19 +64,27 @@ class OpportunityRanker:
         # Fit the regressor
         self.model.fit(X, y)
         
-        # Predictions and Probabilities
+        # Predictions (Regressor outputs continuous values)
         preds = self.model.predict(X)
-        probs = self.model.predict_proba(X)[:, 1]
+        
+        # Normalize heuristic predictions to 0-100 scale
+        p_min = preds.min()
+        p_max = preds.max()
+        if p_max > p_min:
+            heuristic_norm = (preds - p_min) / (p_max - p_min) * 100.0
+        else:
+            heuristic_norm = np.zeros_like(preds)
 
         df = df.copy()
-        df['is_opportunity_heuristic'] = preds
-        df['heuristic_score'] = probs
+        df['is_opportunity_heuristic'] = heuristic_norm > 50
+        df['heuristic_score'] = heuristic_norm
         
         # Supervised Model Scoring
         if self.supervised_model is not None:
             try:
+                # Classifier outputs probabilities
                 sup_probs = self.supervised_model.predict_proba(X)[:, 1]
-                df['supervised_score'] = sup_probs
+                df['supervised_score'] = sup_probs * 100.0 # scale to 0-100
                 # Combine both for a master score
                 df['master_score'] = (df['heuristic_score'] + df['supervised_score']) / 2.0
             except Exception as e:
