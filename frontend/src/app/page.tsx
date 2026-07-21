@@ -8,6 +8,7 @@ interface Opportunity {
   question?: string;
   title?: string;
   event_title?: string;
+  outcome?: string;
   volume: number;
   liquidity: number;
   master_score?: number;
@@ -78,8 +79,8 @@ export default function Dashboard() {
           const bidPct = ((imb + 1) / 2) * 100;
           const askPct = 100 - bidPct;
 
-          // Prioritize specific title first, fallback to event title
-          const displayTitle = opp.title || opp.question || opp.event_title || "Market Name Unknown";
+          // Prioritize event title (which has ...) and render the outcome separately
+          const displayTitle = opp.event_title || opp.title || opp.question || "Market Name Unknown";
           const displayRank = opp.rank || idx + 1;
           const displayScore = opp.master_score ?? opp.opportunity_score ?? 0;
           const displayNote = opp.llm_analysis || opp.research_note || "";
@@ -93,7 +94,22 @@ export default function Dashboard() {
             >
               <div className="card-header">
                 <span className="card-rank">#{displayRank}</span>
-                <h2 className="card-title">{displayTitle}</h2>
+                <h2 className="card-title">
+                  {displayTitle}
+                  {opp.outcome && (
+                    <span style={{ 
+                      color: 'var(--accent-green)', 
+                      marginLeft: '0.5rem', 
+                      background: 'rgba(16,185,129,0.1)', 
+                      padding: '2px 8px', 
+                      borderRadius: '4px',
+                      fontSize: '0.9rem',
+                      display: 'inline-block'
+                    }}>
+                      Option: {opp.outcome}
+                    </span>
+                  )}
+                </h2>
               </div>
 
               <div className="badges">
