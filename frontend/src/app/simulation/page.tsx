@@ -28,11 +28,16 @@ export default function SimulationPage() {
       .then(res => res.json())
       .then(data => {
         if (data.status === "success") {
-          // Format timestamps for display
-          const formattedHistory = data.data.history.map((h: any) => ({
-            ...h,
-            timeLabel: h.timestamp.split('_')[1] + ':00'
-          }));
+          // Format timestamps for display (YYYYMMDD_HH -> DD/MM HH:00)
+          const formattedHistory = data.data.history.map((h: any) => {
+            const day = h.timestamp.substring(6, 8);
+            const month = h.timestamp.substring(4, 6);
+            const hour = h.timestamp.split('_')[1];
+            return {
+              ...h,
+              timeLabel: `${day}/${month} ${hour}:00`
+            };
+          });
           setHistory(formattedHistory);
           setTrades(data.data.trades);
         }

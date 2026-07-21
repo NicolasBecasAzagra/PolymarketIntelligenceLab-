@@ -39,9 +39,12 @@ export default function MarketModal({ marketId, title, onClose }: MarketModalPro
       const formattedHistory = (histRes.data || []).map((h: any) => {
         const scorePct = h.score > 1 ? h.score : h.score * 100;
         const pricePct = (h.price || 0) * 100;
+        const day = h.timestamp.substring(6, 8);
+        const month = h.timestamp.substring(4, 6);
+        const hour = h.timestamp.split('_')[1];
         return {
           ...h,
-          timeLabel: h.timestamp.split('_')[1] + ':00', // e.g. 20260721_18 -> 18:00
+          timeLabel: `${day}/${month} ${hour}:00`,
           scorePct: scorePct,
           pricePct: pricePct,
           buySignal: scorePct > 80 ? pricePct : null
