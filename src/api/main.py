@@ -174,6 +174,88 @@ def get_market_news(market_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/api/simulation")
+def run_simulation():
+    """Runs a backtest simulation over historical predictions."""
+    try:
+        files = sorted(glob.glob("data/models/scored_markets_*.csv"))
+        if not files:
+            return {"status": "success", "data": {"history": [], "trades": []}}
+            
+        balance = 3000.0
+        positions = {} # market_id -> {shares, title, last_price}
+        portfolio_history = []
+        trades = []
+        
+        for f in files:
+            match = re.search(r'scored_markets_(\d{8}_\d{2})\.csv', f)
+            timestamp = match.group(1) if match else "Unknown"
+            
+            df = pd.read_csv(f)
+            df['id'] = df['id'].astype(str)
+            
+            # Update last prices
+            current_prices = {}
+            for _, row in df.iterrows():
+                current_prices[str(row['id'])] = float(row.get('yes_price', 0))
+                
+            for m_id in positions:
+                if m_id in current_prices:
+                    positions[m_id]['last_price'] = current_prices[m_id]
+                    
+            # Calculate Portfolio Value
+            portfolio_value = balance + sum(pos['shares'] * pos['last_price'] for pos in positions.values())
+            portfolio_history.append({"timestamp": timestamp, "value": portfolio_value})
+            
+            # Trading Logic
+            for _, row in df.iterrows():
+                m_id = str(row['id'])
+                title = str(row.get('event_title', row.get('title', 'Unknown')))
+                score = row.get('master_score', row.get('opportunity_score', 0))
+                score_pct = score if score > 1 else score * 100
+                price = float(row.get('yes_price', 0))
+                
+                if price <= 0: continue
+                
+                # BUY Rule
+                if score_pct > 80 and m_id not in positions and balance >= 200:
+                    shares = 200 / price
+                    balance -= 200
+                    positions[m_id] = {"shares": shares, "title": title, "last_price": price}
+                    trades.append({
+                        "timestamp": timestamp,
+                        "type": "BUY",
+                        "title": title,
+                        "price": price,
+                        "shares": shares,
+                        "amount": 200
+                    })
+                
+                # SELL Rule
+                elif score_pct < 50 and m_id in positions:
+                    shares = positions[m_id]['shares']
+                    revenue = shares * price
+                    balance += revenue
+                    trades.append({
+                        "timestamp": timestamp,
+                        "type": "SELL",
+                        "title": title,
+                        "price": price,
+                        "shares": shares,
+                        "amount": revenue
+                    })
+                    del positions[m_id]
+                    
+        return {
+            "status": "success", 
+            "data": {
+                "history": portfolio_history, 
+                "trades": list(reversed(trades)) # newest first
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/api/system/health")
 def health_check():
     return {"status": "online", "mode": "Beast Mode"}

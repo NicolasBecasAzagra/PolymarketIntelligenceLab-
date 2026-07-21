@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   description: "Institutional-grade AI prediction market terminal.",
 };
 
+import Navbar from "../components/Navbar";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -24,7 +26,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <Navbar />
+        {children}
+      </body>
     </html>
   );
 }

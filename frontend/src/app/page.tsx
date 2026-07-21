@@ -34,8 +34,18 @@ export default function Dashboard() {
         if (!res.ok) throw new Error("Failed to fetch data from API");
         return res.json();
       })
-      .then((json) => {
-        setOpportunities(json.data || []);
+      .then((data) => {
+        if (data.status === "success" && Array.isArray(data.data)) {
+          // Explicitly sort by master_score or opportunity_score descending
+          const sorted = data.data.sort((a: any, b: any) => {
+            const scoreA = a.master_score ?? a.opportunity_score ?? 0;
+            const scoreB = b.master_score ?? b.opportunity_score ?? 0;
+            return scoreB - scoreA;
+          });
+          setOpportunities(sorted);
+        } else {
+          setError("Failed to load opportunities.");
+        }
         setLoading(false);
       })
       .catch((err) => {
