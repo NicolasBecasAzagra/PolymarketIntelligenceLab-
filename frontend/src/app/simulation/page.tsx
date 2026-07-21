@@ -168,7 +168,7 @@ export default function SimulationPage() {
                           {t.title}
                         </td>
                         <td style={{ padding: '1rem', fontFamily: 'var(--font-mono)' }}>
-                          {t.price.toFixed(2)}¢
+                          {(t.price * 100).toFixed(1)}¢
                         </td>
                         <td style={{ padding: '1rem', fontFamily: 'var(--font-mono)' }}>
                           {t.shares.toFixed(2)}
