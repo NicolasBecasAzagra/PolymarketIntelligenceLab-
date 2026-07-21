@@ -67,6 +67,11 @@ export default function MarketModal({ marketId, title, onClose }: MarketModalPro
         <h2 className="modal-title">{title}</h2>
         <div className="modal-badges">
           <span className="badge"><Activity size={14} /> Market Detail</span>
+          {history.length > 0 && (
+            <span className="badge" style={{backgroundColor: 'var(--accent-green)', color: '#000'}}>
+              Current Price: {((history[history.length - 1].price || 0) * 100).toFixed(1)}¢
+            </span>
+          )}
         </div>
 
         {loading ? (
@@ -83,9 +88,14 @@ export default function MarketModal({ marketId, title, onClose }: MarketModalPro
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                     <XAxis dataKey="timeLabel" stroke="#a1a1aa" fontSize={12} />
                     <YAxis yAxisId="left" stroke="#8b5cf6" fontSize={12} domain={['auto', 'auto']} />
-                    <YAxis yAxisId="right" orientation="right" stroke="#10b981" fontSize={12} domain={[0, 100]} unit="%" />
+                    <YAxis yAxisId="right" orientation="right" stroke="#10b981" fontSize={12} domain={[0, 100]} unit="¢" />
                     <Tooltip 
                       contentStyle={{ backgroundColor: 'rgba(10,10,10,0.9)', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '8px' }}
+                      formatter={(value: any, name: string) => {
+                        if (name === "Yes Price (%)") return [`${Number(value).toFixed(1)}¢`, "Price"];
+                        if (name === "AI Score (0-100)") return [Number(value).toFixed(1), "AI Score"];
+                        return [value, name];
+                      }}
                     />
                     <Legend />
                     <Line yAxisId="left" type="monotone" dataKey="scorePct" stroke="#8b5cf6" strokeWidth={3} name="AI Score (0-100)" dot={{r:3}} />

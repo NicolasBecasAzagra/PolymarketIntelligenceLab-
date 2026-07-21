@@ -78,7 +78,8 @@ export default function Dashboard() {
           const bidPct = ((imb + 1) / 2) * 100;
           const askPct = 100 - bidPct;
 
-          const displayTitle = opp.event_title || opp.question || opp.title || "Market Name Unknown";
+          // Prioritize specific title first, fallback to event title
+          const displayTitle = opp.title || opp.question || opp.event_title || "Market Name Unknown";
           const displayRank = opp.rank || idx + 1;
           const displayScore = opp.master_score ?? opp.opportunity_score ?? 0;
           const displayNote = opp.llm_analysis || opp.research_note || "";
