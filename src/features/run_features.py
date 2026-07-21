@@ -1,10 +1,13 @@
 import logging
 import sys
+import pandas as pd
 import os
 import glob
 from datetime import datetime
 from src.storage.silver import clean_bronze_data
 from src.features.builder import FeatureBuilder
+from src.ingestion.news_client import NewsClient
+from src.features.nlp_sentiment import NLPSentimentAnalyzer
 
 logging.basicConfig(
     level=logging.INFO,
@@ -21,6 +24,13 @@ def get_latest_bronze_file(bronze_dir: str = "data/raw") -> str:
     files.sort(key=os.path.getmtime, reverse=True)
     return files[0]
 
+def get_previous_features_file(output_dir: str = "data/processed") -> str:
+    files = glob.glob(os.path.join(output_dir, "features_*.parquet"))
+    if not files:
+        return None
+    files.sort(key=os.path.getmtime, reverse=True)
+    return files[0]
+
 def main():
     logger.info("Starting Feature Engineering Pipeline...")
     
@@ -34,6 +44,29 @@ def main():
         
         # 3. Silver -> Gold (Features)
         gold_features_df = FeatureBuilder.build_features(silver_df)
+        
+        # 3.5 NLP Sentiment
+        logger.info("Fetching news for NLP sentiment analysis...")
+        news_client = NewsClient()
+        news_df = news_client.fetch_recent_news()
+        
+        nlp = NLPSentimentAnalyzer()
+        gold_features_df = nlp.calculate_sentiment(gold_features_df, news_df)
+        
+        # 3.6 Carry forward previous sentiment if no new news
+        prev_file = get_previous_features_file()
+        if prev_file:
+            try:
+                prev_df = pd.read_parquet(prev_file)
+                if 'news_sentiment_score' in prev_df.columns and 'id' in prev_df.columns:
+                    prev_scores = prev_df[['id', 'news_sentiment_score', 'news_volume']].set_index('id')
+                    for idx, row in gold_features_df.iterrows():
+                        market_id = row['id']
+                        if row.get('news_volume', 0) == 0 and market_id in prev_scores.index:
+                            gold_features_df.at[idx, 'news_sentiment_score'] = prev_scores.at[market_id, 'news_sentiment_score']
+                            gold_features_df.at[idx, 'news_volume'] = prev_scores.at[market_id, 'news_volume']
+            except Exception as e:
+                logger.warning(f"Could not carry forward previous sentiment: {e}")
         
         # 4. Save to Processed layer
         output_dir = "data/processed"

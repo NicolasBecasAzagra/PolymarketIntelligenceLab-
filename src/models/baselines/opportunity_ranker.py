@@ -19,8 +19,12 @@ class OpportunityRanker:
             random_state=42
         )
         self.feature_cols = [
-            'velocity_24h', 'velocity_1wk', 'liquidity_to_oi_ratio', 
-            'urgency_score', 'market_age_days'
+            'liquidity', 'volume', 'volume24hr',
+            'days_to_resolution', 'urgency_score',
+            'velocity_24h', 'velocity_1wk',
+            'liquidity_to_oi_ratio', 'comments_per_1k_volume',
+            'bid_ask_spread', 'liquidity_imbalance', 'whale_wall_size',
+            'news_sentiment_score', 'news_volume'
         ]
 
     def _synthesize_target(self, df: pd.DataFrame) -> pd.Series:
