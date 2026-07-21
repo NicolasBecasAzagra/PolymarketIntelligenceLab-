@@ -4,15 +4,18 @@ import { useEffect, useState } from "react";
 
 interface Opportunity {
   id: string;
-  question: string;
+  question?: string;
+  title?: string;
   volume: number;
   liquidity: number;
-  master_score: number;
-  rank: number;
-  news_sentiment_score: number;
-  bid_ask_spread: number;
-  liquidity_imbalance: number;
+  master_score?: number;
+  opportunity_score?: number;
+  rank?: number;
+  news_sentiment_score?: number;
+  bid_ask_spread?: number;
+  liquidity_imbalance?: number;
   llm_analysis?: string;
+  research_note?: string;
   tags?: string[];
 }
 
@@ -58,10 +61,14 @@ export default function Dashboard() {
       <main className="grid">
         {opportunities.map((opp, idx) => {
           // Calculate L2 bars based on imbalance (-1.0 to 1.0)
-          // If imbalance is 1.0, 100% bids. If -1.0, 100% asks.
           const imb = opp.liquidity_imbalance || 0;
           const bidPct = ((imb + 1) / 2) * 100;
           const askPct = 100 - bidPct;
+
+          const displayTitle = opp.question || opp.title || "Market Name Unknown";
+          const displayRank = opp.rank || idx + 1;
+          const displayScore = opp.master_score ?? opp.opportunity_score ?? 0;
+          const displayNote = opp.llm_analysis || opp.research_note || "";
 
           return (
             <div 
@@ -70,29 +77,29 @@ export default function Dashboard() {
               style={{ animationDelay: `${idx * 0.05}s` }}
             >
               <div className="card-header">
-                <span className="card-rank">#{opp.rank}</span>
-                <h2 className="card-title">{opp.question}</h2>
+                <span className="card-rank">#{displayRank}</span>
+                <h2 className="card-title">{displayTitle}</h2>
               </div>
 
               <div className="badges">
-                {opp.news_sentiment_score > 0.2 && <span className="badge bullish">Bullish News</span>}
-                {opp.news_sentiment_score < -0.2 && <span className="badge bearish">Bearish News</span>}
+                {(opp.news_sentiment_score || 0) > 0.2 && <span className="badge bullish">Bullish News</span>}
+                {(opp.news_sentiment_score || 0) < -0.2 && <span className="badge bearish">Bearish News</span>}
                 {opp.volume > 1000000 && <span className="badge">Whale Vol</span>}
                 {Array.isArray(opp.tags) && opp.tags.slice(0, 2).map(tag => (
                   <span key={tag} className="badge">{tag}</span>
                 ))}
               </div>
 
-              {opp.llm_analysis && (
+              {displayNote && (
                 <div className="llm-note">
-                  " {opp.llm_analysis} "
+                  " {displayNote} "
                 </div>
               )}
 
               <div className="metrics">
                 <div className="metric-pill">
                   <span className="metric-label">AI Score</span>
-                  <span className="metric-value score">{(opp.master_score * 100).toFixed(1)}</span>
+                  <span className="metric-value score">{displayScore > 1 ? displayScore.toFixed(1) : (displayScore * 100).toFixed(1)}</span>
                 </div>
                 <div className="metric-pill">
                   <span className="metric-label">Volume</span>
