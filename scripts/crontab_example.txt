@@ -8,14 +8,14 @@
 # Note: Ensure you have your .env file with OPENAI_API_KEY in the project root.
 
 # 1. Ejecutar Ingesta cada hora en el minuto 0 (e.g. 10:00, 11:00)
-0 * * * * cd /ruta/a/PolymarketIntelligenceLab- && ~/.local/bin/poetry run python -m src.ingestion.run_ingestion >> /tmp/polymarket_ingestion.log 2>&1
+0 * * * * cd /home/nicolas/proyect/PolymarketIntelligenceLab- && ~/.local/bin/poetry run python -m src.ingestion.run_ingestion >> /tmp/polymarket_ingestion.log 2>&1
 
 # Cron Job para la tubería MLOps Automática (Self-Learning)
 # Se ejecuta una vez al día a las 03:00 AM. Cruza los mercados cerrados con la historia y entrena el cerebro.
 0 3 * * * cd /home/nicolas/proyect/PolymarketIntelligenceLab- && ./scripts/run_mlops.sh >> /tmp/polymarket_mlops.log 2>&1
 
 # 2. Ejecutar Feature Engineering en el minuto 5 (e.g. 10:05, 11:05)
-5 * * * * cd /ruta/a/PolymarketIntelligenceLab- && ~/.local/bin/poetry run python -m src.features.run_features >> /tmp/polymarket_features.log 2>&1
+5 * * * * cd /home/nicolas/proyect/PolymarketIntelligenceLab- && ~/.local/bin/poetry run python -m src.features.run_features >> /tmp/polymarket_features.log 2>&1
 
 # 3. Ejecutar Modelos, Detección de Anomalías y LLM (OpenAI) en el minuto 10 (e.g. 10:10, 11:10)
-10 * * * * cd /ruta/a/PolymarketIntelligenceLab- && ~/.local/bin/poetry run python -m src.models.run_models >> /tmp/polymarket_models.log 2>&1
+10 * * * * cd /home/nicolas/proyect/PolymarketIntelligenceLab- && ~/.local/bin/poetry run python -m src.models.run_models >> /tmp/polymarket_models.log 2>&1
