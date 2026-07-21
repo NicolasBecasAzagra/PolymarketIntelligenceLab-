@@ -19,7 +19,8 @@ FASTAPI_PID=$!
 # 2. Start Next.js Frontend
 echo "-> Starting Next.js Frontend on port 3000..."
 cd frontend
-npm run dev -- -H 0.0.0.0 &
+npm run build
+npm run start -- -H 0.0.0.0 &
 NEXTJS_PID=$!
 
 echo "================================================================="
