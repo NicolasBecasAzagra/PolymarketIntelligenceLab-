@@ -19,11 +19,11 @@ cd "$(dirname "$0")/.."
 
 # Build the training dataset (Downloads closed markets and merges with history)
 echo "1. Building MLOps Dataset..."
-python3 -m poetry run python -m src.storage.mlops_dataset
+~/.local/bin/poetry run python -m src.storage.mlops_dataset
 
 # Train the supervised model and register in MLflow
 echo "2. Training Supervised Model..."
-python3 -m poetry run python -m src.models.train_supervised
+~/.local/bin/poetry run python -m src.models.train_supervised
 
 echo "================================================================="
 echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] MLOps Loop Completed Successfully"
