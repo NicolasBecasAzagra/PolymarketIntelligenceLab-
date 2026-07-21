@@ -215,7 +215,9 @@ def run_simulation():
                 score_pct = score if score > 1 else score * 100
                 price = float(row.get('yes_price', 0))
                 
-                if price <= 0: continue
+                # Fallback if price is 0 or missing so the simulation doesn't stall
+                if price <= 0: 
+                    price = 0.5
                 
                 # BUY Rule
                 if score_pct > 80 and m_id not in positions and balance >= 200:
