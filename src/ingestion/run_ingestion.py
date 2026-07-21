@@ -21,34 +21,39 @@ def main():
     logger.info("Extracting active events from Polymarket Gamma API...")
     try:
         events = client.fetch_active_events(limit=50)
-        logger.info(f"Extracted {len(events)} events. Fetching L2 Order Books for markets...")
+        logger.info(f"Extracted {len(events)} events. Extracting individual markets and fetching L2 Order Books...")
+        
+        flat_markets = []
         
         for event in events:
             markets = event.get('markets', [])
             
-            # If the event title is truncated, use the first market's question
-            if '...' in event.get('title', '') and markets:
-                event['title'] = markets[0].get('question', event.get('title'))
-                
-            # Extract yes_price from the first market
-            event['yes_price'] = 0.5
-            if markets:
-                try:
-                    prices_str = markets[0].get('outcomePrices')
-                    prices = json.loads(prices_str) if isinstance(prices_str, str) else prices_str
-                    if prices and isinstance(prices, list):
-                        event['yes_price'] = float(prices[0])
-                except Exception:
-                    pass
-
             for market in markets:
+                # 1. Handle titles and descriptions
+                # The specific question of the market becomes the primary title
                 market['event_title'] = event.get('title', '')
-                try:
-                    prices = json.loads(market.get('outcomePrices', '["0.5", "0.5"]')) if isinstance(market.get('outcomePrices'), str) else market.get('outcomePrices', [0.5, 0.5])
-                    market['yes_price'] = float(prices[0])
-                except:
-                    market['yes_price'] = 0.5
-                    
+                market['title'] = market.get('question', market['event_title'])
+                market['description'] = event.get('description', '')
+                
+                # 2. Inherit metadata from the parent event
+                market['endDate'] = event.get('endDate')
+                market['createdAt'] = event.get('creationDate', market.get('createdAt'))
+                market['commentCount'] = event.get('commentCount', 0)
+                
+                # For some APIs volume is at event level, sometimes at market level. We keep market if > 0, else event
+                market['volume'] = float(market.get('volume', 0)) if float(market.get('volume', 0)) > 0 else float(event.get('volume', 0))
+                market['liquidity'] = float(market.get('liquidity', 0)) if float(market.get('liquidity', 0)) > 0 else float(event.get('liquidity', 0))
+                
+                # 3. Extract Yes Price
+                # Polymarket Gamma API usually provides lastTradePrice, bestBid, or bestAsk directly on the market
+                price = float(market.get('lastTradePrice', 0))
+                if price <= 0:
+                    price = float(market.get('bestBid', 0))
+                if price <= 0:
+                    price = 0.5 # fallback
+                market['yes_price'] = price
+                
+                # 4. Fetch L2 Order Book
                 clob_token_ids_str = market.get('clobTokenIds')
                 if clob_token_ids_str:
                     try:
@@ -69,7 +74,9 @@ def main():
                     market['order_book_bids'] = "[]"
                     market['order_book_asks'] = "[]"
                     
-        logger.info("Order books fetched successfully.")
+                flat_markets.append(market)
+                    
+        logger.info(f"Order books fetched successfully. Total distinct markets: {len(flat_markets)}")
     except Exception as e:
         logger.error(f"Failed to extract data: {e}")
         sys.exit(1)
@@ -77,7 +84,7 @@ def main():
     # 3. Load to Bronze
     logger.info("Loading data into Bronze layer (Parquet)...")
     try:
-        filepath = save_to_bronze(events)
+        filepath = save_to_bronze(flat_markets)
         logger.info(f"Ingestion completed successfully. File: {filepath}")
     except Exception as e:
         logger.error(f"Failed to save data to Bronze layer: {e}")
