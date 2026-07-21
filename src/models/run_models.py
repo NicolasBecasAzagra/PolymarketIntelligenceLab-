@@ -61,8 +61,8 @@ def main():
             if not shap_df.empty:
                 df = pd.concat([df, shap_df], axis=1)
             
-            # Sort by opportunity score
-            df = df.sort_values(by="opportunity_score", ascending=False)
+            # Sort by master score
+            df = df.sort_values(by="master_score", ascending=False)
             
             # 4. Generate Research Notes (LLM)
             logger.info("Generating Research Notes for Top 3 Markets...")
@@ -84,7 +84,7 @@ def main():
                 df.at[idx, 'research_note'] = note
             
             # Log top 1 opportunity score as a metric
-            top_score = float(df['opportunity_score'].iloc[0]) if not df.empty else 0.0
+            top_score = float(df['master_score'].iloc[0]) if not df.empty else 0.0
             mlflow.log_metric("top_opportunity_score", top_score)
             
             # Save results
@@ -96,7 +96,7 @@ def main():
             filepath = os.path.join(output_dir, filename)
             
             # Save top 50 (or all if <50) for inspection, selecting readable columns
-            display_cols = ['id', 'title', 'event_title', 'yes_price', 'volume', 'liquidity', 'is_anomaly', 'opportunity_score', 'research_note']
+            display_cols = ['id', 'title', 'event_title', 'yes_price', 'volume', 'liquidity', 'is_anomaly', 'master_score', 'research_note']
             available_cols = [c for c in display_cols if c in df.columns]
             df[available_cols].head(50).to_csv(filepath, index=False)
             
