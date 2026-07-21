@@ -20,20 +20,20 @@ This file tracks the high-level roadmap and current global state of the project.
 - [x] Explainability (SHAP + LLM summaries).
 - [x] Scripts de despliegue en VPS y automatización CRON 24/7.
 
-### Week 3: Institutional Data & NLP (NEXT)
-- [ ] Ingesta de Order Book (L2) para Bid/Ask spread y Whale Detection.
-- [ ] Módulo NLP (Twitter/News Sentiment) correlacionado con volumen.
-- [ ] Refactor del Feature Builder para soportar series temporales profundas y L2.
+### Week 3: Institutional Data & NLP (COMPLETED)
+- [x] Ingesta de Order Book (L2) para Bid/Ask spread y Whale Detection.
+- [x] Módulo NLP (Twitter/News Sentiment) correlacionado con volumen.
+- [x] Refactor del Feature Builder para soportar series temporales profundas y L2.
 
 ### Week 4: Beast Mode Models (Deep Learning & MLOps)
-- [ ] Modelos avanzados time-series Transformers (PatchTST / N-BEATS).
-- [ ] MLOps Loop: Script de re-entrenamiento automático con mercados cerrados (Self-Learning).
-- [ ] Backtesting institucional de la estrategia.
+- [ ] Modelos avanzados time-series Transformers (PatchTST / N-BEATS). (Skip por el momento, XGBoost rinde al nivel necesario).
+- [x] MLOps Loop: Script de re-entrenamiento automático con mercados cerrados (Self-Learning).
+- [x] Backtesting institucional de la estrategia.
 
-### Week 5: Serving & Demo (Deprioritized for now)
+### Week 5: Serving & Demo (NEXT)
 - [ ] FastAPI desplegada con endpoints clave (`src/serving`).
 - [ ] Dashboard frontend funcional (Next.js).
 - [ ] Tests, Docker, y CI/CD polish.
 
 ## 📌 Current Focus
-- El sistema básico está desplegado en el VPS recolectando datos. Pausa de desarrollo para acumular histórico. A la vuelta: Comenzaremos con la ingesta de Order Book y NLP.
+- Data Engineering, AI, NLP, L2 y MLOps completados al 100%. El sistema está vivo en el VPS aprendiendo. Siguiente paso: Levantar el Backend (FastAPI) y la interfaz visual (Dashboard Next.js).
