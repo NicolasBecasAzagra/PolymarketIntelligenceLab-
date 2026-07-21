@@ -91,7 +91,7 @@ export default function MarketModal({ marketId, title, onClose }: MarketModalPro
                     <YAxis yAxisId="right" orientation="right" stroke="#10b981" fontSize={12} domain={[0, 100]} unit="¢" />
                     <Tooltip 
                       contentStyle={{ backgroundColor: 'rgba(10,10,10,0.9)', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '8px' }}
-                      formatter={(value: any, name: string) => {
+                      formatter={(value: any, name: any) => {
                         if (name === "Yes Price (%)") return [`${Number(value).toFixed(1)}¢`, "Price"];
                         if (name === "AI Score (0-100)") return [Number(value).toFixed(1), "AI Score"];
                         return [value, name];
