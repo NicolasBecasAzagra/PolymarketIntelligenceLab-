@@ -24,7 +24,7 @@ export default function SimulationPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/simulation")
+    fetch(`/api/simulation?t=${Date.now()}`)
       .then(res => res.json())
       .then(data => {
         if (data.status === "success") {

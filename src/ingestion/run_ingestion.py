@@ -32,7 +32,12 @@ def main():
                 # 1. Handle titles and descriptions
                 # The specific question of the market becomes the primary title
                 market['event_title'] = event.get('title', '')
-                market['title'] = market.get('question', market['event_title'])
+                base_title = market.get('question', market['event_title'])
+                group_title = market.get('groupItemTitle', '').strip()
+                if group_title:
+                    market['title'] = f"{base_title} - {group_title}"
+                else:
+                    market['title'] = base_title
                 market['description'] = event.get('description', '')
                 
                 # 2. Inherit metadata from the parent event

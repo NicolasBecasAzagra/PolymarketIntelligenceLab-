@@ -29,7 +29,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     // Fetch all opportunities through Next.js proxy
-    fetch("/api/opportunities?limit=1000")
+    fetch(`/api/opportunities?limit=1000&t=${Date.now()}`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch data from API");
         return res.json();
