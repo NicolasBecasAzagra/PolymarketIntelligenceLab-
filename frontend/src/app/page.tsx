@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import MarketModal from "../components/MarketModal";
 
 interface Opportunity {
   id: string;
@@ -23,6 +24,7 @@ export default function Dashboard() {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedMarket, setSelectedMarket] = useState<Opportunity | null>(null);
 
   useEffect(() => {
     // Fetch all opportunities through Next.js proxy
@@ -75,6 +77,7 @@ export default function Dashboard() {
               key={opp.id} 
               className="card"
               style={{ animationDelay: `${idx * 0.05}s` }}
+              onClick={() => setSelectedMarket(opp)}
             >
               <div className="card-header">
                 <span className="card-rank">#{displayRank}</span>
@@ -122,6 +125,14 @@ export default function Dashboard() {
           );
         })}
       </main>
+
+      {selectedMarket && (
+        <MarketModal 
+          marketId={selectedMarket.id} 
+          title={selectedMarket.question || selectedMarket.title || "Market Details"} 
+          onClose={() => setSelectedMarket(null)} 
+        />
+      )}
     </div>
   );
 }

@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 import glob
 import os
+import re
+from src.ingestion.news_client import NewsClient
 import json
 
 app = FastAPI(title="Polymarket Intelligence Lab API")
@@ -65,20 +67,108 @@ def get_opportunities(limit: int = 50):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/anomalies")
-def get_anomalies():
-    """
-    Returns markets flagged as anomalies by the Isolation Forest model.
-    """
-    latest_csv = get_latest_file("data/models", "scored_markets_", ".csv")
-    if not latest_csv:
-        raise HTTPException(status_code=404, detail="No scored markets found.")
-        
+def get_anomalies(limit: int = 10):
+    """Returns top volume/liquidity anomalies."""
     try:
-        df = pd.read_csv(latest_csv)
-        if 'is_anomaly' in df.columns:
-            anomalies = df[df['is_anomaly'] == True]
-            return anomalies.fillna(0).to_dict(orient="records")
-        return []
+        latest_file = get_latest_file("data/models", "scored_markets_", ".csv")
+        df = pd.read_csv(latest_file)
+        
+        # Filter anomalies
+        anomalies = df[df['is_anomaly'] == True]
+        
+        # Sort by anomaly score or volume
+        if 'anomaly_score' in anomalies.columns:
+            anomalies = anomalies.sort_values(by='anomaly_score', ascending=False)
+        else:
+            anomalies = anomalies.sort_values(by='volume', ascending=False)
+            
+        return {"status": "success", "data": anomalies.head(limit).to_dict(orient="records")}
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/market/{market_id}/history")
+def get_market_history(market_id: str):
+    """Returns historical score and volume data for a specific market."""
+    try:
+        files = sorted(glob.glob("data/models/scored_markets_*.csv"))
+        if not files:
+            raise FileNotFoundError("No historical data found.")
+            
+        history = []
+        for f in files:
+            # Extract timestamp from filename: scored_markets_YYYYMMDD_HH.csv
+            match = re.search(r'scored_markets_(\d{8}_\d{2})\.csv', f)
+            timestamp = match.group(1) if match else "Unknown"
+            
+            df = pd.read_csv(f)
+            # Ensure ID is string for comparison
+            df['id'] = df['id'].astype(str)
+            market_row = df[df['id'] == str(market_id)]
+            
+            if not market_row.empty:
+                row = market_row.iloc[0]
+                score = row.get('master_score', row.get('opportunity_score', 0))
+                volume = row.get('volume', 0)
+                history.append({
+                    "timestamp": timestamp,
+                    "score": float(score),
+                    "volume": float(volume)
+                })
+                
+        return {"status": "success", "data": history}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/market/{market_id}/news")
+def get_market_news(market_id: str):
+    """Fetches recent news relevant to the market."""
+    try:
+        # First get the market title to know what to search for
+        latest_file = get_latest_file("data/models", "scored_markets_", ".csv")
+        df = pd.read_csv(latest_file)
+        df['id'] = df['id'].astype(str)
+        market_row = df[df['id'] == str(market_id)]
+        
+        if market_row.empty:
+            raise HTTPException(status_code=404, detail="Market not found")
+            
+        title = market_row.iloc[0].get('question', market_row.iloc[0].get('title', ''))
+        
+        # Simple keyword extraction (words > 4 chars)
+        words = re.findall(r'\b[A-Za-z]{5,}\b', title)
+        keywords = [w.lower() for w in words]
+        
+        client = NewsClient()
+        news_df = client.fetch_recent_news()
+        
+        relevant_news = []
+        for _, row in news_df.iterrows():
+            news_text = (str(row['title']) + " " + str(row['summary'])).lower()
+            # If any keyword matches, or if no keywords just return general top news
+            if not keywords or any(kw in news_text for kw in keywords):
+                relevant_news.append({
+                    "title": row['title'],
+                    "summary": row['summary'],
+                    "source": row['source'],
+                    "published_at": str(row['published_at'])
+                })
+                
+            if len(relevant_news) >= 5: # Limit to 5 news items
+                break
+                
+        # Fallback if no specific news found: return top 3 general news
+        if not relevant_news and not news_df.empty:
+            for _, row in news_df.head(3).iterrows():
+                relevant_news.append({
+                    "title": row['title'],
+                    "summary": row['summary'],
+                    "source": row['source'],
+                    "published_at": str(row['published_at'])
+                })
+                
+        return {"status": "success", "data": relevant_news}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
