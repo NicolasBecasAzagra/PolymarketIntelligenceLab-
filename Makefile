@@ -1,4 +1,4 @@
-.PHONY: install test lint format run-api run-frontend run-ingestion run-features run-models
+.PHONY: install test lint format run-api run-frontend run-ingestion run-features run-models run-mlops run-all
 
 install:
 	python3 -m poetry install

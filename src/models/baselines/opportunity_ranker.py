@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import xgboost as xgb
 import shap
+import mlflow
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +27,18 @@ class OpportunityRanker:
             'bid_ask_spread', 'liquidity_imbalance', 'whale_wall_size',
             'news_sentiment_score', 'news_volume'
         ]
+        
+        # Try to load Supervised Model from MLflow
+        self.supervised_model = None
+        try:
+            client = mlflow.tracking.MlflowClient()
+            # Fetch latest version of the model
+            latest_version = client.get_latest_versions("Polymarket_Supervised_Ranker", stages=["None"])[0].version
+            model_uri = f"models:/Polymarket_Supervised_Ranker/{latest_version}"
+            self.supervised_model = mlflow.xgboost.load_model(model_uri)
+            logger.info(f"Loaded Supervised Model from MLflow (version {latest_version}).")
+        except Exception as e:
+            logger.info("No supervised model found in MLflow yet. Using strictly heuristic baseline.")
 
     def _synthesize_target(self, df: pd.DataFrame) -> pd.Series:
         # A heuristic proxy for 'good opportunity'
@@ -51,11 +64,32 @@ class OpportunityRanker:
         # Fit the regressor
         self.model.fit(X, y)
         
-        # Predict the score
-        scores = self.model.predict(X)
-        
+        # Predictions and Probabilities
+        preds = self.model.predict(X)
+        probs = self.model.predict_proba(X)[:, 1]
+
         df = df.copy()
-        df['opportunity_score'] = scores
+        df['is_opportunity_heuristic'] = preds
+        df['heuristic_score'] = probs
+        
+        # Supervised Model Scoring
+        if self.supervised_model is not None:
+            try:
+                sup_probs = self.supervised_model.predict_proba(X)[:, 1]
+                df['supervised_score'] = sup_probs
+                # Combine both for a master score
+                df['master_score'] = (df['heuristic_score'] + df['supervised_score']) / 2.0
+            except Exception as e:
+                logger.warning(f"Supervised model scoring failed: {e}")
+                df['supervised_score'] = 0.0
+                df['master_score'] = df['heuristic_score']
+        else:
+            df['supervised_score'] = 0.0
+            df['master_score'] = df['heuristic_score']
+            
+        # Final Ranking based on master_score
+        df = df.sort_values(by='master_score', ascending=False).reset_index(drop=True)
+        df['rank'] = df.index + 1
         
         return df
 

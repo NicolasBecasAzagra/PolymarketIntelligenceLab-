@@ -10,6 +10,10 @@
 # 1. Ejecutar Ingesta cada hora en el minuto 0 (e.g. 10:00, 11:00)
 0 * * * * cd /ruta/a/PolymarketIntelligenceLab- && ~/.local/bin/poetry run python -m src.ingestion.run_ingestion >> /tmp/polymarket_ingestion.log 2>&1
 
+# Cron Job para la tubería MLOps Automática (Self-Learning)
+# Se ejecuta una vez al día a las 03:00 AM. Cruza los mercados cerrados con la historia y entrena el cerebro.
+0 3 * * * cd /home/nicolas/proyect/PolymarketIntelligenceLab- && ./scripts/run_mlops.sh >> /tmp/polymarket_mlops.log 2>&1
+
 # 2. Ejecutar Feature Engineering en el minuto 5 (e.g. 10:05, 11:05)
 5 * * * * cd /ruta/a/PolymarketIntelligenceLab- && ~/.local/bin/poetry run python -m src.features.run_features >> /tmp/polymarket_features.log 2>&1
 
