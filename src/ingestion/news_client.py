@@ -42,7 +42,7 @@ class NewsClient:
                     all_news.append({
                         "title": entry.get("title", ""),
                         "summary": entry.get("summary", ""),
-                        "source": url,
+                        "source": entry.get("link", url),
                         "published_at": parsed_date
                     })
             except Exception as e:

@@ -111,10 +111,12 @@ def get_market_history(market_id: str):
                 row = market_row.iloc[0]
                 score = row.get('master_score', row.get('opportunity_score', 0))
                 volume = row.get('volume', 0)
+                price = row.get('yes_price', 0)
                 history.append({
                     "timestamp": timestamp,
                     "score": float(score),
-                    "volume": float(volume)
+                    "volume": float(volume),
+                    "price": float(price)
                 })
                 
         return {"status": "success", "data": history}

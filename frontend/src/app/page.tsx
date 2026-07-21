@@ -7,6 +7,7 @@ interface Opportunity {
   id: string;
   question?: string;
   title?: string;
+  event_title?: string;
   volume: number;
   liquidity: number;
   master_score?: number;
@@ -67,7 +68,7 @@ export default function Dashboard() {
           const bidPct = ((imb + 1) / 2) * 100;
           const askPct = 100 - bidPct;
 
-          const displayTitle = opp.question || opp.title || "Market Name Unknown";
+          const displayTitle = opp.event_title || opp.question || opp.title || "Market Name Unknown";
           const displayRank = opp.rank || idx + 1;
           const displayScore = opp.master_score ?? opp.opportunity_score ?? 0;
           const displayNote = opp.llm_analysis || opp.research_note || "";
@@ -129,7 +130,7 @@ export default function Dashboard() {
       {selectedMarket && (
         <MarketModal 
           marketId={selectedMarket.id} 
-          title={selectedMarket.question || selectedMarket.title || "Market Details"} 
+          title={selectedMarket.event_title || selectedMarket.question || selectedMarket.title || "Market Details"} 
           onClose={() => setSelectedMarket(null)} 
         />
       )}

@@ -8,6 +8,7 @@ interface HistoryPoint {
   timestamp: string;
   score: number;
   volume: number;
+  price?: number;
 }
 
 interface NewsItem {
@@ -35,10 +36,17 @@ export default function MarketModal({ marketId, title, onClose }: MarketModalPro
       fetch(`/api/market/${marketId}/news`).then(r => r.ok ? r.json() : {data: []})
     ]).then(([histRes, newsRes]) => {
       // Format timestamps for graph
-      const formattedHistory = (histRes.data || []).map((h: any) => ({
-        ...h,
-        timeLabel: h.timestamp.split('_')[1] + ':00', // e.g. 20260721_18 -> 18:00
-      }));
+      const formattedHistory = (histRes.data || []).map((h: any) => {
+        const scorePct = h.score > 1 ? h.score : h.score * 100;
+        const pricePct = (h.price || 0) * 100;
+        return {
+          ...h,
+          timeLabel: h.timestamp.split('_')[1] + ':00', // e.g. 20260721_18 -> 18:00
+          scorePct: scorePct,
+          pricePct: pricePct,
+          buySignal: scorePct > 80 ? pricePct : null
+        };
+      });
       setHistory(formattedHistory);
       setNews(newsRes.data || []);
       setLoading(false);
@@ -71,14 +79,27 @@ export default function MarketModal({ marketId, title, onClose }: MarketModalPro
                   <LineChart data={history}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                     <XAxis dataKey="timeLabel" stroke="#a1a1aa" fontSize={12} />
-                    <YAxis yAxisId="left" stroke="#8b5cf6" fontSize={12} domain={['auto', 'auto']} />
-                    <YAxis yAxisId="right" orientation="right" stroke="#10b981" fontSize={12} />
+                    <YAxis yAxisId="left" stroke="#8b5cf6" fontSize={12} domain={[0, 100]} />
+                    <YAxis yAxisId="right" orientation="right" stroke="#10b981" fontSize={12} domain={[0, 100]} unit="%" />
                     <Tooltip 
                       contentStyle={{ backgroundColor: 'rgba(10,10,10,0.9)', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '8px' }}
                     />
                     <Legend />
-                    <Line yAxisId="left" type="monotone" dataKey="score" stroke="#8b5cf6" strokeWidth={3} name="AI Score" dot={{r:4}} />
-                    <Line yAxisId="right" type="monotone" dataKey="volume" stroke="#10b981" strokeWidth={2} name="Volume ($)" dot={false} />
+                    <Line yAxisId="left" type="monotone" dataKey="scorePct" stroke="#8b5cf6" strokeWidth={3} name="AI Score (0-100)" dot={{r:3}} />
+                    <Line yAxisId="right" type="monotone" dataKey="pricePct" stroke="#10b981" strokeWidth={2} name="Yes Price (%)" dot={false} />
+                    
+                    {/* BUY Signals */}
+                    <Line 
+                      yAxisId="right"
+                      type="monotone" 
+                      dataKey="buySignal" 
+                      stroke="none" 
+                      name="BUY Signal"
+                      isAnimationActive={true}
+                      connectNulls={false}
+                      dot={{ r: 8, fill: '#10b981', stroke: '#fff', strokeWidth: 2 }} 
+                      activeDot={{ r: 10 }}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </div>

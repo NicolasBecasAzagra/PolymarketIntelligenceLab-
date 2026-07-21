@@ -25,7 +25,30 @@ def main():
         
         for event in events:
             markets = event.get('markets', [])
+            
+            # If the event title is truncated, use the first market's question
+            if '...' in event.get('title', '') and markets:
+                event['title'] = markets[0].get('question', event.get('title'))
+                
+            # Extract yes_price from the first market
+            event['yes_price'] = 0.5
+            if markets:
+                try:
+                    prices_str = markets[0].get('outcomePrices')
+                    prices = json.loads(prices_str) if isinstance(prices_str, str) else prices_str
+                    if prices and isinstance(prices, list):
+                        event['yes_price'] = float(prices[0])
+                except Exception:
+                    pass
+
             for market in markets:
+                market['event_title'] = event.get('title', '')
+                try:
+                    prices = json.loads(market.get('outcomePrices', '["0.5", "0.5"]')) if isinstance(market.get('outcomePrices'), str) else market.get('outcomePrices', [0.5, 0.5])
+                    market['yes_price'] = float(prices[0])
+                except:
+                    market['yes_price'] = 0.5
+                    
                 clob_token_ids_str = market.get('clobTokenIds')
                 if clob_token_ids_str:
                     try:
