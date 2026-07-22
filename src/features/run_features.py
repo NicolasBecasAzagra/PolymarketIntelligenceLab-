@@ -46,12 +46,9 @@ def main():
         gold_features_df = FeatureBuilder.build_features(silver_df)
         
         # 3.5 NLP Sentiment
-        logger.info("Fetching news for NLP sentiment analysis...")
-        news_client = NewsClient()
-        news_df = news_client.fetch_recent_news()
-        
+        logger.info("Fetching news dynamically per market for NLP sentiment analysis...")
         nlp = NLPSentimentAnalyzer()
-        gold_features_df = nlp.calculate_sentiment(gold_features_df, news_df)
+        gold_features_df = nlp.calculate_sentiment(gold_features_df)
         
         # 3.6 Carry forward previous sentiment if no new news
         prev_file = get_previous_features_file()

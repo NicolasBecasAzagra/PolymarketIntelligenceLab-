@@ -41,52 +41,58 @@ class NLPSentimentAnalyzer:
                 
         return keywords
 
-    def calculate_sentiment(self, markets_df: pd.DataFrame, news_df: pd.DataFrame) -> pd.DataFrame:
+    def calculate_sentiment(self, markets_df: pd.DataFrame) -> pd.DataFrame:
         """
-        Cross-references markets with news to calculate sentiment.
+        Cross-references markets with dynamic Google News search to calculate sentiment.
         Adds 'news_sentiment_score' and 'news_volume' to the DataFrame.
         """
-        logger.info("Calculating NLP Sentiment...")
+        import time
+        import re
+        from src.ingestion.news_client import NewsClient
         
-        if news_df.empty:
-            logger.warning("No news available for sentiment analysis.")
-            markets_df['news_sentiment_score'] = 0.0
-            markets_df['news_volume'] = 0.0
-            return markets_df
-            
-        # Combine title and summary for analysis
-        news_df['full_text'] = (news_df['title'].fillna('') + " " + news_df['summary'].fillna('')).str.lower()
+        logger.info("Calculating NLP Sentiment dynamically via Google News...")
         
         sentiment_scores = []
         news_volumes = []
+        client = NewsClient()
         
-        for _, row in markets_df.iterrows():
-            question = row.get('question', '')
-            keywords = self._extract_keywords(question)
+        STOP_WORDS = {"is", "are", "was", "were", "be", "been", "being", "have", "has", "had", "do", "does", "did", "will", "would", "shall", "should", "can", "could", "may", "might", "must", "a", "an", "the", "and", "but", "if", "or", "because", "as", "until", "while", "of", "at", "by", "for", "with", "about", "against", "between", "into", "through", "during", "before", "after", "above", "below", "to", "from", "up", "down", "in", "out", "on", "off", "over", "under", "again", "further", "then", "once", "here", "there", "when", "where", "why", "how", "all", "any", "both", "each", "few", "more", "most", "other", "some", "such", "no", "nor", "not", "only", "own", "same", "so", "than", "too", "very", "s", "t", "just", "don", "now", "called", "election", "market", "price", "time", "year", "month", "day", "week"}
+        
+        for idx, row in markets_df.iterrows():
+            title = str(row.get('question', row.get('title', '')))
+            
+            # Extract strict keywords
+            words = re.findall(r'\b[A-Za-z0-9]{2,}\b', title)
+            keywords = [w.lower() for w in words if w.lower() not in STOP_WORDS]
             
             if not keywords:
                 sentiment_scores.append(0.0)
                 news_volumes.append(0.0)
                 continue
                 
-            # Find news matching ANY of the strong keywords
-            # A more robust approach would use TF-IDF or embeddings, but keyword matching is a solid baseline
-            matched_news = news_df[news_df['full_text'].apply(lambda text: any(kw in text for kw in keywords))]
+            query = " ".join(keywords)
+            try:
+                news_df = client.fetch_news_for_query(query)
+            except Exception as e:
+                logger.error(f"Failed to fetch news for {query}: {e}")
+                news_df = pd.DataFrame()
             
-            if matched_news.empty:
+            if news_df.empty:
                 sentiment_scores.append(0.0)
                 news_volumes.append(0.0)
             else:
-                # Score the matched news
+                news_df['full_text'] = (news_df['title'].fillna('') + " " + news_df['summary'].fillna('')).str.lower()
                 scores = []
-                for text in matched_news['full_text']:
+                for text in news_df['full_text']:
                     vs = self.analyzer.polarity_scores(text)
-                    scores.append(vs['compound']) # Compound is the normalized score -1 to 1
+                    scores.append(vs['compound'])
                     
-                # Average sentiment of matched news
                 avg_sentiment = sum(scores) / len(scores)
                 sentiment_scores.append(avg_sentiment)
                 news_volumes.append(float(len(scores)))
+                
+            # Be nice to Google RSS API
+            time.sleep(0.5)
                 
         markets_df['news_sentiment_score'] = sentiment_scores
         markets_df['news_volume'] = news_volumes
