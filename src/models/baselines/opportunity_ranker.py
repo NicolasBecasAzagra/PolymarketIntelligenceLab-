@@ -79,21 +79,20 @@ class OpportunityRanker:
         df['is_opportunity_heuristic'] = heuristic_norm > 50
         df['heuristic_score'] = heuristic_norm
         
-        # Supervised Model Scoring
+        # Supervised Model Scoring (Directional YES/NO)
         if self.supervised_model is not None:
             try:
-                # Classifier outputs probabilities
+                # Classifier outputs probabilities of YES
                 sup_probs = self.supervised_model.predict_proba(X)[:, 1]
-                df['supervised_score'] = sup_probs * 100.0 # scale to 0-100
-                # Combine both for a master score
-                df['master_score'] = (df['heuristic_score'] + df['supervised_score']) / 2.0
+                df['directional_confidence'] = sup_probs * 100.0 # scale to 0-100
             except Exception as e:
                 logger.warning(f"Supervised model scoring failed: {e}")
-                df['supervised_score'] = 0.0
-                df['master_score'] = df['heuristic_score']
+                df['directional_confidence'] = 50.0
         else:
-            df['supervised_score'] = 0.0
-            df['master_score'] = df['heuristic_score']
+            df['directional_confidence'] = 50.0
+            
+        # The master_score keeps tracking the "hotness" (volatility/liquidity anomaly)
+        df['master_score'] = df['heuristic_score']
             
         # Final Ranking based on master_score
         df = df.sort_values(by='master_score', ascending=False).reset_index(drop=True)

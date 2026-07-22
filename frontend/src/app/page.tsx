@@ -13,6 +13,7 @@ interface Opportunity {
   volume: number;
   liquidity: number;
   master_score?: number;
+  directional_confidence?: number;
   opportunity_score?: number;
   rank?: number;
   news_sentiment_score?: number;
@@ -114,7 +115,8 @@ export default function Dashboard() {
               </div>
 
               <div className="badges">
-                {displayScore > 80 && <span className="badge" style={{backgroundColor: 'var(--accent-green)', color: '#000', fontWeight: 'bold'}}>🎯 STRONG BUY (YES)</span>}
+                {displayScore > 70 && (opp.directional_confidence || 50) >= 70 && <span className="badge" style={{backgroundColor: 'var(--accent-green)', color: '#000', fontWeight: 'bold'}}>🟢 BUY YES</span>}
+                {displayScore > 70 && (opp.directional_confidence || 50) <= 30 && <span className="badge" style={{backgroundColor: 'var(--accent-rose)', color: '#fff', fontWeight: 'bold'}}>🔴 BUY NO</span>}
                 {(opp.news_sentiment_score || 0) > 0.2 && <span className="badge bullish">Bullish News</span>}
                 {(opp.news_sentiment_score || 0) < -0.2 && <span className="badge bearish">Bearish News</span>}
                 {opp.volume > 1000000 && <span className="badge">Whale Vol</span>}

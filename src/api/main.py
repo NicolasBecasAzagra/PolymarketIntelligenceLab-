@@ -208,50 +208,71 @@ def run_simulation():
                 title = f"{event_title} ({outcome})" if outcome else event_title
                 score = row.get('master_score', row.get('opportunity_score', 0))
                 score_pct = score if score > 1 else score * 100
+                directional = float(row.get('directional_confidence', 50.0))
                 price = float(row.get('yes_price', 0))
-                
-                # Fallback if price is 0 or missing so the simulation doesn't stall
-                if price <= 0: 
+                no_price = 1.0 - price if price > 0 else 0.5
+                if price <= 0:
                     price = 0.5
                 
-                # BUY Rule
-                if score_pct > 80 and m_id not in positions:
-                    # Dynamic position sizing: $50 to $100 based on confidence (80 to 100)
-                    amount = 50 + ((score_pct - 80) / 20.0) * 50
-                    amount = min(100.0, max(50.0, amount))
-                    
-                    if balance >= amount:
-                        shares = amount / price
-                        balance -= amount
-                        positions[m_id] = {"shares": shares, "title": title, "last_price": price, "buy_price": price}
-                        trades.append({
-                            "timestamp": timestamp,
-                            "type": "BUY",
-                            "title": title,
-                            "price": price,
-                            "shares": shares,
-                            "amount": amount,
-                            "pnl": 0.0
-                        })
+                # Trading requires the market to be "hot" (high master_score)
+                if score_pct > 70 and m_id not in positions:
+                    # Decide direction based on supervised ML model
+                    if directional >= 70:
+                        trade_direction = "BUY YES"
+                        trade_price = price
+                        conf = directional
+                    elif directional <= 30:
+                        trade_direction = "BUY NO"
+                        trade_price = no_price
+                        conf = 100.0 - directional
+                    else:
+                        trade_direction = None
+                        
+                    if trade_direction:
+                        # Dynamic position sizing: $50 to $100 based on confidence
+                        amount = 50 + ((conf - 70) / 30.0) * 50
+                        amount = min(100.0, max(50.0, amount))
+                        
+                        if balance >= amount:
+                            shares = amount / trade_price
+                            balance -= amount
+                            positions[m_id] = {
+                                "shares": shares, 
+                                "title": title, 
+                                "trade_direction": trade_direction,
+                                "last_price": trade_price, 
+                                "buy_price": trade_price,
+                                "amount_invested": amount
+                            }
+                            trades.append({
+                                "timestamp": timestamp,
+                                "type": trade_direction,
+                                "title": title,
+                                "price": trade_price,
+                                "shares": shares,
+                                "amount": amount,
+                                "pnl": 0.0
+                            })
                 
                 # SELL Rule: Take Profit (+30%) or Stop Loss (-20%)
                 elif m_id in positions:
                     pos = positions[m_id]
                     buy_price = pos['buy_price']
+                    direction = pos['trade_direction']
                     
-                    if price >= buy_price * 1.30 or price <= buy_price * 0.80:
-                        shares = pos['shares']
-                        revenue = shares * price
-                        cost = shares * buy_price
-                        pnl = revenue - cost
-                        balance += revenue
+                    # Track price depending on what we bought
+                    current_trade_price = price if direction == "BUY YES" else no_price
+                    
+                    if current_trade_price >= buy_price * 1.30 or current_trade_price <= buy_price * 0.80:
+                        pnl = (current_trade_price - buy_price) * pos['shares']
+                        balance += pos['amount_invested'] + pnl
                         trades.append({
                             "timestamp": timestamp,
                             "type": "SELL",
-                            "title": title,
-                            "price": price,
-                            "shares": shares,
-                            "amount": revenue,
+                            "title": pos['title'],
+                            "price": current_trade_price,
+                            "shares": pos['shares'],
+                            "amount": pos['amount_invested'] + pnl,
                             "pnl": pnl
                         })
                         del positions[m_id]

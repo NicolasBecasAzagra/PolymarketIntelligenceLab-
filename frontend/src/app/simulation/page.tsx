@@ -156,12 +156,12 @@ export default function SimulationPage() {
                           {t.timestamp.split('_')[1] + ':00'}
                         </td>
                         <td style={{ padding: '1rem' }}>
-                          {t.type === "BUY" ? (
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: 'var(--accent-green)', background: 'rgba(16,185,129,0.1)', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600 }}>
-                              <ArrowUpRight size={14} /> BUY
+                          {t.type.startsWith("BUY") ? (
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: t.type === 'BUY YES' ? 'var(--accent-green)' : 'var(--accent-rose)', background: t.type === 'BUY YES' ? 'rgba(16,185,129,0.1)' : 'rgba(244,63,94,0.1)', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600 }}>
+                              <ArrowUpRight size={14} /> {t.type}
                             </span>
                           ) : (
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: 'var(--accent-rose)', background: 'rgba(244,63,94,0.1)', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600 }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: 'var(--text-primary)', background: 'rgba(255,255,255,0.1)', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600 }}>
                               <ArrowDownRight size={14} /> SELL
                             </span>
                           )}
