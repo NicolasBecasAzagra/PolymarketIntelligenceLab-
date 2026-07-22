@@ -391,3 +391,23 @@ body {
   cursor: pointer;
 }
 
+/* Top News Ticker */
+.top-news-ticker {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  line-height: 1.4;
+  font-style: italic;
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  margin-top: 0.5rem;
+}
+.top-news-ticker strong {
+  color: var(--accent-blue);
+  font-weight: 600;
+  font-style: normal;
+}

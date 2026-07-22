@@ -21,6 +21,7 @@ interface Opportunity {
   liquidity_imbalance?: number;
   llm_analysis?: string;
   research_note?: string;
+  top_news_headline?: string;
   tags?: string[];
 }
 
@@ -128,6 +129,13 @@ export default function Dashboard() {
               {displayNote && (
                 <div className="llm-note">
                   " {displayNote} "
+                </div>
+              )}
+
+              {opp.top_news_headline && (
+                <div className="top-news-ticker">
+                  <span>📰</span>
+                  <span><strong>Breaking:</strong> {opp.top_news_headline}</span>
                 </div>
               )}
 
