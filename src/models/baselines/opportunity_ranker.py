@@ -89,7 +89,11 @@ class OpportunityRanker:
                 logger.warning(f"Supervised model scoring failed: {e}")
                 df['directional_confidence'] = 50.0
         else:
-            df['directional_confidence'] = 50.0
+            # Zero-Shot Fallback: Use L2 Order Book Imbalance as directional predictor
+            # liquidity_imbalance ranges from -1.0 (Bearish/Selling) to 1.0 (Bullish/Buying)
+            # Map this to a 10% to 90% confidence interval
+            imb = df.get('liquidity_imbalance', pd.Series(np.zeros(len(df)))).fillna(0.0)
+            df['directional_confidence'] = 50.0 + (imb * 40.0)
             
         # The master_score keeps tracking the "hotness" (volatility/liquidity anomaly)
         df['master_score'] = df['heuristic_score']
