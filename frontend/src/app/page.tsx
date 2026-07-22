@@ -9,6 +9,7 @@ interface Opportunity {
   title?: string;
   event_title?: string;
   outcome?: string;
+  yes_price?: number;
   volume: number;
   liquidity: number;
   master_score?: number;
@@ -131,6 +132,12 @@ export default function Dashboard() {
                 <div className="metric-pill">
                   <span className="metric-label">AI Score</span>
                   <span className="metric-value score">{displayScore > 1 ? displayScore.toFixed(1) : (displayScore * 100).toFixed(1)}</span>
+                </div>
+                <div className="metric-pill">
+                  <span className="metric-label">Probability (Yes)</span>
+                  <span className="metric-value" style={{color: 'var(--accent-green)'}}>
+                    {opp.yes_price !== undefined ? (opp.yes_price * 100).toFixed(1) + '%' : 'N/A'}
+                  </span>
                 </div>
                 <div className="metric-pill">
                   <span className="metric-label">Volume</span>
