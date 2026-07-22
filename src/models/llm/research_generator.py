@@ -19,11 +19,9 @@ class ResearchGenerator:
             self.client = OpenAI(api_key=self.api_key)
             
         self.system_prompt = (
-            "You are a quantitative research analyst at a top Wall Street firm specializing in prediction markets. "
-            "Write a concise, professional research note (max 2 paragraphs) explaining why the provided market is currently ranked as a top opportunity. "
-            "Base your analysis STRICTLY on the provided quantitative metrics (Volume, Liquidity, Velocity) and SHAP feature importances. "
-            "SHAP values explain how much each feature contributed to the model's high opportunity score. "
-            "Do not hallucinate external events unless absolutely obvious from the market title. Maintain a formal, analytical tone."
+            "You are a quant analyst. Write an extremely concise note (MAX 2 SENTENCES) explaining why the market is a top opportunity. "
+            "Use the provided Metrics (Volume, Liquidity) and SHAP values. "
+            "Do not hallucinate. Be direct, professional, and do not use filler words."
         )
 
     def generate_note(self, market_title: str, metrics: Dict[str, Any], shap_values: Dict[str, float]) -> str:
@@ -51,7 +49,7 @@ class ResearchGenerator:
                     {"role": "user", "content": user_prompt}
                 ],
                 temperature=0.3,
-                max_tokens=250
+                max_tokens=100
             )
             return response.choices[0].message.content.strip()
         except Exception as e:

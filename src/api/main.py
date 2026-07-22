@@ -213,19 +213,24 @@ def run_simulation():
                     price = 0.5
                 
                 # BUY Rule
-                if score_pct > 80 and m_id not in positions and balance >= 200:
-                    shares = 200 / price
-                    balance -= 200
-                    positions[m_id] = {"shares": shares, "title": title, "last_price": price, "buy_price": price}
-                    trades.append({
-                        "timestamp": timestamp,
-                        "type": "BUY",
-                        "title": title,
-                        "price": price,
-                        "shares": shares,
-                        "amount": 200,
-                        "pnl": 0.0
-                    })
+                if score_pct > 80 and m_id not in positions:
+                    # Dynamic position sizing: $50 to $100 based on confidence (80 to 100)
+                    amount = 50 + ((score_pct - 80) / 20.0) * 50
+                    amount = min(100.0, max(50.0, amount))
+                    
+                    if balance >= amount:
+                        shares = amount / price
+                        balance -= amount
+                        positions[m_id] = {"shares": shares, "title": title, "last_price": price, "buy_price": price}
+                        trades.append({
+                            "timestamp": timestamp,
+                            "type": "BUY",
+                            "title": title,
+                            "price": price,
+                            "shares": shares,
+                            "amount": amount,
+                            "pnl": 0.0
+                        })
                 
                 # SELL Rule: Take Profit (+30%) or Stop Loss (-20%)
                 elif m_id in positions:

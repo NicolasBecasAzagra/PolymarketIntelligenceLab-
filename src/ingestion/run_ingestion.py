@@ -29,6 +29,10 @@ def main():
             markets = event.get('markets', [])
             
             for market in markets:
+                # Filter out markets that are already resolved, closed, or inactive
+                if market.get('closed') or market.get('resolved') or not market.get('active', True):
+                    continue
+                    
                 # 1. Handle titles and descriptions
                 # The specific question of the market becomes the primary title
                 market['event_title'] = event.get('title', '')

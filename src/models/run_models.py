@@ -65,11 +65,11 @@ def main():
             df = df.sort_values(by="master_score", ascending=False)
             
             # 4. Generate Research Notes (LLM)
-            logger.info("Generating Research Notes for Top 3 Markets...")
+            logger.info("Generating Research Notes for Top 50 Markets...")
             generator = ResearchGenerator()
             df['research_note'] = "Not generated"
             
-            for i in range(min(3, len(df))):
+            for i in range(min(50, len(df))):
                 idx = df.index[i]
                 row = df.loc[idx]
                 title = row.get('title', 'Unknown Market')
