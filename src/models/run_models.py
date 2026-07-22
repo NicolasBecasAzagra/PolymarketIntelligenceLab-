@@ -96,7 +96,7 @@ def main():
             filepath = os.path.join(output_dir, filename)
             
             # Save top 50 (or all if <50) for inspection, selecting readable columns
-            display_cols = ['id', 'title', 'event_title', 'outcome', 'yes_price', 'volume', 'liquidity', 'is_anomaly', 'master_score', 'research_note', 'liquidity_imbalance', 'bid_ask_spread', 'news_sentiment_score']
+            display_cols = ['id', 'title', 'event_title', 'outcome', 'yes_price', 'volume', 'liquidity', 'is_anomaly', 'master_score', 'directional_confidence', 'research_note', 'liquidity_imbalance', 'bid_ask_spread', 'news_sentiment_score']
             available_cols = [c for c in display_cols if c in df.columns]
             df[available_cols].head(50).to_csv(filepath, index=False)
             
