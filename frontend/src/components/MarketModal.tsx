@@ -47,7 +47,7 @@ export default function MarketModal({ marketId, title, onClose }: MarketModalPro
           timeLabel: `${day}/${month} ${hour}:00`,
           scorePct: scorePct,
           pricePct: pricePct,
-          buySignal: scorePct > 80 ? 100 : null // Always plot BUY at the top of the chart
+          buySignal: scorePct > 80 ? pricePct : null // Plot BUY on the price line
         };
       });
       setHistory(formattedHistory);

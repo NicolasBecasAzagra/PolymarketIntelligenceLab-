@@ -138,8 +138,8 @@ def get_market_news(market_id: str):
             
         title = market_row.iloc[0].get('question', market_row.iloc[0].get('title', ''))
         
-        # Simple keyword extraction (words > 4 chars)
-        words = re.findall(r'\b[A-Za-z]{5,}\b', title)
+        # Simple keyword extraction (words > 3 chars)
+        words = re.findall(r'\b[A-Za-z]{4,}\b', title)
         keywords = [w.lower() for w in words]
         
         client = NewsClient()
@@ -160,15 +160,7 @@ def get_market_news(market_id: str):
             if len(relevant_news) >= 5: # Limit to 5 news items
                 break
                 
-        # Fallback if no specific news found: return top 3 general news
-        if not relevant_news and not news_df.empty:
-            for _, row in news_df.head(3).iterrows():
-                relevant_news.append({
-                    "title": row['title'],
-                    "summary": row['summary'],
-                    "source": row['source'],
-                    "published_at": str(row['published_at'])
-                })
+        # Fallback removed: if no specific news found, we return empty list so UI shows "No relevant news"
                 
         return {"status": "success", "data": relevant_news}
     except Exception as e:
