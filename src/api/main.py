@@ -136,12 +136,13 @@ def get_market_news(market_id: str):
         if market_row.empty:
             raise HTTPException(status_code=404, detail="Market not found")
             
-        title = market_row.iloc[0].get('question', market_row.iloc[0].get('title', ''))
-        
-        # Keyword extraction: >4 chars and not in stopwords
-        STOP_WORDS = {"will", "that", "this", "with", "from", "your", "have", "time", "called", "when", "what", "where", "who", "which", "election", "market", "price", "there", "their", "about", "would", "could"}
-        words = re.findall(r'\b[A-Za-z]{5,}\b', title)
+        # Strict Keyword Extraction (catch 2+ chars like US, UK, AI, but block all common words)
+        STOP_WORDS = {"is", "are", "was", "were", "be", "been", "being", "have", "has", "had", "do", "does", "did", "will", "would", "shall", "should", "can", "could", "may", "might", "must", "a", "an", "the", "and", "but", "if", "or", "because", "as", "until", "while", "of", "at", "by", "for", "with", "about", "against", "between", "into", "through", "during", "before", "after", "above", "below", "to", "from", "up", "down", "in", "out", "on", "off", "over", "under", "again", "further", "then", "once", "here", "there", "when", "where", "why", "how", "all", "any", "both", "each", "few", "more", "most", "other", "some", "such", "no", "nor", "not", "only", "own", "same", "so", "than", "too", "very", "s", "t", "just", "don", "now", "called", "election", "market", "price", "time", "year", "month", "day", "week"}
+        words = re.findall(r'\b[A-Za-z0-9]{2,}\b', title)
         keywords = [w.lower() for w in words if w.lower() not in STOP_WORDS]
+        
+        if not keywords:
+            return {"status": "success", "data": []}
         
         client = NewsClient()
         news_df = client.fetch_recent_news()
@@ -150,14 +151,14 @@ def get_market_news(market_id: str):
         for _, row in news_df.iterrows():
             news_text = (str(row['title']) + " " + str(row['summary'])).lower()
             
-            # Use regex to match whole words only to avoid substring false positives
+            # Strict mode: must match at least one highly specific keyword exactly
             match_found = False
             for kw in keywords:
                 if re.search(rf'\b{kw}\b', news_text):
                     match_found = True
                     break
                     
-            if not keywords or match_found:
+            if match_found:
                 relevant_news.append({
                     "title": row['title'],
                     "summary": row['summary'],

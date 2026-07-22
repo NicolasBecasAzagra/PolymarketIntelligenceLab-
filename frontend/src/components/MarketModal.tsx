@@ -46,8 +46,7 @@ export default function MarketModal({ marketId, title, onClose }: MarketModalPro
           ...h,
           timeLabel: `${day}/${month} ${hour}:00`,
           scorePct: scorePct,
-          pricePct: pricePct,
-          buySignal: scorePct > 80 ? pricePct : null // Plot BUY on the price line
+          pricePct: pricePct
         };
       });
       setHistory(formattedHistory);
@@ -88,7 +87,7 @@ export default function MarketModal({ marketId, title, onClose }: MarketModalPro
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                     <XAxis dataKey="timeLabel" stroke="#a1a1aa" fontSize={12} />
                     <YAxis yAxisId="left" stroke="#8b5cf6" fontSize={12} domain={['auto', 'auto']} />
-                    <YAxis yAxisId="right" orientation="right" stroke="#10b981" fontSize={12} domain={[0, 100]} unit="¢" />
+                    <YAxis yAxisId="right" orientation="right" stroke="#10b981" fontSize={12} domain={['auto', 'auto']} unit="¢" />
                     <Tooltip 
                       contentStyle={{ backgroundColor: 'rgba(10,10,10,0.9)', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '8px' }}
                       formatter={(value: any, name: any) => {
@@ -101,18 +100,6 @@ export default function MarketModal({ marketId, title, onClose }: MarketModalPro
                     <Line yAxisId="left" type="monotone" dataKey="scorePct" stroke="#8b5cf6" strokeWidth={3} name="AI Score (0-100)" dot={{r:3}} />
                     <Line yAxisId="right" type="monotone" dataKey="pricePct" stroke="#10b981" strokeWidth={2} name="Yes Price (%)" dot={false} />
                     
-                    {/* BUY Signals */}
-                    <Line 
-                      yAxisId="right"
-                      type="monotone" 
-                      dataKey="buySignal" 
-                      stroke="none" 
-                      name="BUY Signal"
-                      isAnimationActive={true}
-                      connectNulls={false}
-                      dot={{ r: 8, fill: '#10b981', stroke: '#fff', strokeWidth: 2 }} 
-                      activeDot={{ r: 10 }}
-                    />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
