@@ -138,9 +138,10 @@ def get_market_news(market_id: str):
             
         title = market_row.iloc[0].get('question', market_row.iloc[0].get('title', ''))
         
-        # Simple keyword extraction (words > 3 chars)
-        words = re.findall(r'\b[A-Za-z]{4,}\b', title)
-        keywords = [w.lower() for w in words]
+        # Keyword extraction: >4 chars and not in stopwords
+        STOP_WORDS = {"will", "that", "this", "with", "from", "your", "have", "time", "called", "when", "what", "where", "who", "which", "election", "market", "price", "there", "their", "about", "would", "could"}
+        words = re.findall(r'\b[A-Za-z]{5,}\b', title)
+        keywords = [w.lower() for w in words if w.lower() not in STOP_WORDS]
         
         client = NewsClient()
         news_df = client.fetch_recent_news()
@@ -148,8 +149,15 @@ def get_market_news(market_id: str):
         relevant_news = []
         for _, row in news_df.iterrows():
             news_text = (str(row['title']) + " " + str(row['summary'])).lower()
-            # If any keyword matches, or if no keywords just return general top news
-            if not keywords or any(kw in news_text for kw in keywords):
+            
+            # Use regex to match whole words only to avoid substring false positives
+            match_found = False
+            for kw in keywords:
+                if re.search(rf'\b{kw}\b', news_text):
+                    match_found = True
+                    break
+                    
+            if not keywords or match_found:
                 relevant_news.append({
                     "title": row['title'],
                     "summary": row['summary'],
