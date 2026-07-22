@@ -55,6 +55,7 @@ class NLPSentimentAnalyzer:
         sentiment_scores = []
         news_volumes = []
         client = NewsClient()
+        query_cache = {}
         
         STOP_WORDS = {"is", "are", "was", "were", "be", "been", "being", "have", "has", "had", "do", "does", "did", "will", "would", "shall", "should", "can", "could", "may", "might", "must", "a", "an", "the", "and", "but", "if", "or", "because", "as", "until", "while", "of", "at", "by", "for", "with", "about", "against", "between", "into", "through", "during", "before", "after", "above", "below", "to", "from", "up", "down", "in", "out", "on", "off", "over", "under", "again", "further", "then", "once", "here", "there", "when", "where", "why", "how", "all", "any", "both", "each", "few", "more", "most", "other", "some", "such", "no", "nor", "not", "only", "own", "same", "so", "than", "too", "very", "s", "t", "just", "don", "now", "called", "election", "market", "price", "time", "year", "month", "day", "week"}
         
@@ -71,6 +72,13 @@ class NLPSentimentAnalyzer:
                 continue
                 
             query = " ".join(keywords)
+            
+            # Check Cache first (since multiple markets share the same event question)
+            if query in query_cache:
+                sentiment_scores.append(query_cache[query]['score'])
+                news_volumes.append(query_cache[query]['volume'])
+                continue
+                
             try:
                 news_df = client.fetch_news_for_query(query)
             except Exception as e:
@@ -80,6 +88,7 @@ class NLPSentimentAnalyzer:
             if news_df.empty:
                 sentiment_scores.append(0.0)
                 news_volumes.append(0.0)
+                query_cache[query] = {'score': 0.0, 'volume': 0.0}
             else:
                 news_df['full_text'] = (news_df['title'].fillna('') + " " + news_df['summary'].fillna('')).str.lower()
                 scores = []
@@ -87,9 +96,12 @@ class NLPSentimentAnalyzer:
                     vs = self.analyzer.polarity_scores(text)
                     scores.append(vs['compound'])
                     
-                avg_sentiment = sum(scores) / len(scores)
+                avg_sentiment = sum(scores) / len(scores) if scores else 0.0
+                news_volume_val = float(len(scores))
+                
                 sentiment_scores.append(avg_sentiment)
-                news_volumes.append(float(len(scores)))
+                news_volumes.append(news_volume_val)
+                query_cache[query] = {'score': avg_sentiment, 'volume': news_volume_val}
                 
             # Be nice to Google RSS API
             time.sleep(0.5)

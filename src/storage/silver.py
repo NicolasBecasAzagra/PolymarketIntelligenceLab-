@@ -47,10 +47,6 @@ def clean_bronze_data(bronze_filepath: str) -> pd.DataFrame:
         
     if 'markets' in df.columns:
         df['num_submarkets'] = df['markets'].apply(parse_json_len)
-        
-    # 4. Filter to Top 50 markets by volume
-    if 'volume' in df.columns:
-        df = df.sort_values(by='volume', ascending=False).head(50).copy()
 
     logger.info(f"Silver cleaning complete. Shape: {df.shape}")
     return df
