@@ -6,7 +6,7 @@ import { Wallet, ArrowUpRight, ArrowDownRight, History } from "lucide-react";
 
 interface Trade {
   timestamp: string;
-  type: "BUY" | "SELL";
+  type: "BUY" | "SELL" | "BUY YES" | "BUY NO";
   title: string;
   price: number;
   shares: number;
