@@ -60,10 +60,12 @@ class NLPSentimentAnalyzer:
         STOP_WORDS = {"is", "are", "was", "were", "be", "been", "being", "have", "has", "had", "do", "does", "did", "will", "would", "shall", "should", "can", "could", "may", "might", "must", "a", "an", "the", "and", "but", "if", "or", "because", "as", "until", "while", "of", "at", "by", "for", "with", "about", "against", "between", "into", "through", "during", "before", "after", "above", "below", "to", "from", "up", "down", "in", "out", "on", "off", "over", "under", "again", "further", "then", "once", "here", "there", "when", "where", "why", "how", "all", "any", "both", "each", "few", "more", "most", "other", "some", "such", "no", "nor", "not", "only", "own", "same", "so", "than", "too", "very", "s", "t", "just", "don", "now", "called", "election", "market", "price", "time", "year", "month", "day", "week"}
         
         for idx, row in markets_df.iterrows():
-            title = str(row.get('question', row.get('title', '')))
+            title = row.get('event_title', row.get('title', ''))
+            outcome = row.get('outcome', '')
+            search_text = f"{title} {outcome}"
             
-            # Extract strict keywords
-            words = re.findall(r'\b[A-Za-z0-9]{2,}\b', title)
+            # very basic keyword extraction
+            words = re.findall(r'\b[a-zA-Z]{3,}\b', search_text)
             keywords = [w.lower() for w in words if w.lower() not in STOP_WORDS]
             
             if not keywords:
