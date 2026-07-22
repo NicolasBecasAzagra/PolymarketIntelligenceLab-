@@ -114,6 +114,7 @@ export default function Dashboard() {
               </div>
 
               <div className="badges">
+                {displayScore > 80 && <span className="badge" style={{backgroundColor: 'var(--accent-green)', color: '#000', fontWeight: 'bold'}}>🎯 STRONG BUY (YES)</span>}
                 {(opp.news_sentiment_score || 0) > 0.2 && <span className="badge bullish">Bullish News</span>}
                 {(opp.news_sentiment_score || 0) < -0.2 && <span className="badge bearish">Bearish News</span>}
                 {opp.volume > 1000000 && <span className="badge">Whale Vol</span>}

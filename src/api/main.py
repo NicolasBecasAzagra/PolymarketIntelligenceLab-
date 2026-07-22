@@ -203,7 +203,9 @@ def run_simulation():
             # Trading Logic
             for _, row in df.iterrows():
                 m_id = str(row['id'])
-                title = str(row.get('event_title', row.get('title', 'Unknown')))
+                event_title = str(row.get('event_title', row.get('title', 'Unknown')))
+                outcome = str(row.get('outcome', ''))
+                title = f"{event_title} ({outcome})" if outcome else event_title
                 score = row.get('master_score', row.get('opportunity_score', 0))
                 score_pct = score if score > 1 else score * 100
                 price = float(row.get('yes_price', 0))
