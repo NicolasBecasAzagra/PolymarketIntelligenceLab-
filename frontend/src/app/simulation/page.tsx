@@ -166,7 +166,7 @@ export default function SimulationPage() {
                             </span>
                           )}
                         </td>
-                        <td style={{ padding: '1rem', maxWidth: '300px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        <td style={{ padding: '1rem', maxWidth: '400px', whiteSpace: 'normal', lineHeight: '1.4' }}>
                           {t.title}
                         </td>
                         <td style={{ padding: '1rem', fontFamily: 'var(--font-mono)' }}>
