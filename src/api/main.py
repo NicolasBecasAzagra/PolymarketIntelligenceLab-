@@ -145,27 +145,17 @@ def get_market_news(market_id: str):
             return {"status": "success", "data": []}
         
         client = NewsClient()
-        news_df = client.fetch_recent_news()
+        query = " ".join(keywords)
+        news_df = client.fetch_news_for_query(query)
         
         relevant_news = []
         for _, row in news_df.iterrows():
-            news_text = (str(row['title']) + " " + str(row['summary'])).lower()
-            
-            # Strict mode: must match at least one highly specific keyword exactly
-            match_found = False
-            for kw in keywords:
-                if re.search(rf'\b{kw}\b', news_text):
-                    match_found = True
-                    break
-                    
-            if match_found:
-                relevant_news.append({
-                    "title": row['title'],
-                    "summary": row['summary'],
-                    "source": row['source'],
-                    "published_at": str(row['published_at'])
-                })
-                
+            relevant_news.append({
+                "title": row['title'],
+                "summary": row['summary'],
+                "source": row['source'],
+                "published_at": str(row['published_at'])
+            })
             if len(relevant_news) >= 5: # Limit to 5 news items
                 break
                 
@@ -224,30 +214,38 @@ def run_simulation():
                 if score_pct > 80 and m_id not in positions and balance >= 200:
                     shares = 200 / price
                     balance -= 200
-                    positions[m_id] = {"shares": shares, "title": title, "last_price": price}
+                    positions[m_id] = {"shares": shares, "title": title, "last_price": price, "buy_price": price}
                     trades.append({
                         "timestamp": timestamp,
                         "type": "BUY",
                         "title": title,
                         "price": price,
                         "shares": shares,
-                        "amount": 200
+                        "amount": 200,
+                        "pnl": 0.0
                     })
                 
-                # SELL Rule
-                elif score_pct < 50 and m_id in positions:
-                    shares = positions[m_id]['shares']
-                    revenue = shares * price
-                    balance += revenue
-                    trades.append({
-                        "timestamp": timestamp,
-                        "type": "SELL",
-                        "title": title,
-                        "price": price,
-                        "shares": shares,
-                        "amount": revenue
-                    })
-                    del positions[m_id]
+                # SELL Rule: Take Profit (+30%) or Stop Loss (-20%)
+                elif m_id in positions:
+                    pos = positions[m_id]
+                    buy_price = pos['buy_price']
+                    
+                    if price >= buy_price * 1.30 or price <= buy_price * 0.80:
+                        shares = pos['shares']
+                        revenue = shares * price
+                        cost = shares * buy_price
+                        pnl = revenue - cost
+                        balance += revenue
+                        trades.append({
+                            "timestamp": timestamp,
+                            "type": "SELL",
+                            "title": title,
+                            "price": price,
+                            "shares": shares,
+                            "amount": revenue,
+                            "pnl": pnl
+                        })
+                        del positions[m_id]
                     
         return {
             "status": "success", 

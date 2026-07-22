@@ -11,6 +11,7 @@ interface Trade {
   price: number;
   shares: number;
   amount: number;
+  pnl?: number;
 }
 
 interface PortfolioHistory {
@@ -145,6 +146,7 @@ export default function SimulationPage() {
                       <th style={{ padding: '1rem' }}>Price</th>
                       <th style={{ padding: '1rem' }}>Shares</th>
                       <th style={{ padding: '1rem' }}>Amount</th>
+                      <th style={{ padding: '1rem', textAlign: 'right' }}>P/L</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -175,6 +177,9 @@ export default function SimulationPage() {
                         </td>
                         <td style={{ padding: '1rem', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
                           ${t.amount.toFixed(2)}
+                        </td>
+                        <td style={{ padding: '1rem', fontFamily: 'var(--font-mono)', fontWeight: 600, textAlign: 'right', color: t.pnl && t.pnl > 0 ? 'var(--accent-green)' : (t.pnl && t.pnl < 0 ? 'var(--accent-rose)' : 'var(--text-muted)') }}>
+                          {t.pnl !== undefined && t.type === 'SELL' ? (t.pnl > 0 ? `+$${t.pnl.toFixed(2)}` : `-$${Math.abs(t.pnl).toFixed(2)}`) : '-'}
                         </td>
                       </tr>
                     ))}
