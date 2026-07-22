@@ -43,7 +43,7 @@ class ResearchGenerator:
         try:
             logger.info(f"Generating research note for market: {market_title[:30]}...")
             response = self.client.chat.completions.create(
-                model="gpt-4o",
+                model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": self.system_prompt},
                     {"role": "user", "content": user_prompt}
