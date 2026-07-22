@@ -47,6 +47,11 @@ def clean_bronze_data(bronze_filepath: str) -> pd.DataFrame:
         
     if 'markets' in df.columns:
         df['num_submarkets'] = df['markets'].apply(parse_json_len)
+        
+    # 4. Filter out joke options and practically resolved markets
+    if 'yes_price' in df.columns:
+        df['yes_price'] = pd.to_numeric(df['yes_price'], errors='coerce').fillna(0.5)
+        df = df[(df['yes_price'] >= 0.02) & (df['yes_price'] <= 0.98)].copy()
 
     logger.info(f"Silver cleaning complete. Shape: {df.shape}")
     return df
