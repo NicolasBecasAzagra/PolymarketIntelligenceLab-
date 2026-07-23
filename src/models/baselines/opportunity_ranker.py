@@ -32,18 +32,14 @@ class OpportunityRanker:
         self.supervised_model = None
         try:
             client = mlflow.tracking.MlflowClient()
-            experiment = client.get_experiment_by_name("Polymarket_MLOps")
-            if experiment:
-                runs = client.search_runs(experiment_ids=[experiment.experiment_id], order_by=["start_time DESC"], max_results=1)
-                if runs:
-                    latest_run_id = runs[0].info.run_id
-                    model_uri = f"runs:/{latest_run_id}/model"
-                    self.supervised_model = mlflow.sklearn.load_model(model_uri)
-                    logger.info(f"Loaded Supervised Model from MLflow (Run {latest_run_id}).")
-                else:
-                    logger.info("No runs found in Polymarket_MLOps experiment.")
+            versions = client.search_model_versions("name='Polymarket_Supervised_Ranker'")
+            if versions:
+                latest_version = sorted(versions, key=lambda v: int(v.version), reverse=True)[0]
+                model_uri = f"models:/Polymarket_Supervised_Ranker/{latest_version.version}"
+                self.supervised_model = mlflow.sklearn.load_model(model_uri)
+                logger.info(f"Loaded Supervised Model from MLflow (version {latest_version.version}).")
             else:
-                logger.info("Experiment Polymarket_MLOps not found.")
+                logger.info("No registered model versions found for Polymarket_Supervised_Ranker.")
         except Exception as e:
             logger.error(f"Error loading model from MLflow: {e}")
             logger.info("Using strictly heuristic baseline.")
