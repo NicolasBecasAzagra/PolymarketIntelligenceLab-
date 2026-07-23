@@ -31,17 +31,23 @@ class OpportunityRanker:
         # Try to load Supervised Model from MLflow
         self.supervised_model = None
         try:
-            client = mlflow.tracking.MlflowClient()
-            versions = client.search_model_versions("name='Polymarket_Supervised_Ranker'")
-            if versions:
-                latest_version = sorted(versions, key=lambda v: int(v.version), reverse=True)[0]
-                model_uri = f"models:/Polymarket_Supervised_Ranker/{latest_version.version}"
-                self.supervised_model = mlflow.sklearn.load_model(model_uri)
-                logger.info(f"Loaded Supervised Model from MLflow (version {latest_version.version}).")
+            import glob
+            import os
+            # Bypass MLflow Registry API entirely and look at the physical hard drive
+            model_paths = glob.glob("mlruns/**/artifacts/model", recursive=True)
+            
+            if model_paths:
+                # Get the most recently created model folder
+                model_paths.sort(key=os.path.getmtime, reverse=True)
+                latest_model_path = model_paths[0]
+                
+                # MLflow can load directly from a local path
+                self.supervised_model = mlflow.sklearn.load_model(latest_model_path)
+                logger.info(f"Loaded Supervised Model directly from physical path: {latest_model_path}")
             else:
-                logger.info("No registered model versions found for Polymarket_Supervised_Ranker.")
+                logger.info("No model 'artifacts/model' folders found in mlruns directory.")
         except Exception as e:
-            logger.error(f"Error loading model from MLflow: {e}")
+            logger.error(f"Error loading model physically: {e}")
             logger.info("Using strictly heuristic baseline.")
 
     def _synthesize_target(self, df: pd.DataFrame) -> pd.Series:
