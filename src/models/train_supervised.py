@@ -81,8 +81,8 @@ class SupervisedTrainer:
             mlflow.log_metric("auc", auc)
             
             # Log the model
-            mlflow.xgboost.log_model(
-                xgb_model=model,
+            mlflow.sklearn.log_model(
+                sk_model=model,
                 artifact_path="model",
                 registered_model_name="Polymarket_Supervised_Ranker"
             )

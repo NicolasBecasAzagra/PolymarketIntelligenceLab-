@@ -35,7 +35,7 @@ class OpportunityRanker:
             # Fetch latest version of the model
             latest_version = client.get_latest_versions("Polymarket_Supervised_Ranker", stages=["None"])[0].version
             model_uri = f"models:/Polymarket_Supervised_Ranker/{latest_version}"
-            self.supervised_model = mlflow.xgboost.load_model(model_uri)
+            self.supervised_model = mlflow.sklearn.load_model(model_uri)
             logger.info(f"Loaded Supervised Model from MLflow (version {latest_version}).")
         except Exception as e:
             logger.info("No supervised model found in MLflow yet. Using strictly heuristic baseline.")
