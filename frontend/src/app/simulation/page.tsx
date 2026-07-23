@@ -79,7 +79,7 @@ export default function SimulationPage() {
                 fontSize: '2.5rem', 
                 fontWeight: 'bold', 
                 fontFamily: 'var(--font-display)',
-                color: pnl >= 0 ? 'var(--accent-green)' : 'var(--accent-rose)'
+                color: pnl >= 0 ? 'var(--accent-emerald)' : 'var(--accent-rose)'
               }}>
                 {pnl >= 0 ? '+' : ''}${pnl.toFixed(2)} 
                 <span style={{ fontSize: '1rem', marginLeft: '0.5rem' }}>({pnlPct.toFixed(2)}%)</span>
@@ -157,7 +157,7 @@ export default function SimulationPage() {
                         </td>
                         <td style={{ padding: '1rem' }}>
                           {t.type.startsWith("BUY") ? (
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: t.type === 'BUY YES' ? 'var(--accent-green)' : 'var(--accent-rose)', background: t.type === 'BUY YES' ? 'rgba(16,185,129,0.1)' : 'rgba(244,63,94,0.1)', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600 }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: t.type === 'BUY YES' ? 'var(--accent-emerald)' : 'var(--accent-rose)', background: t.type === 'BUY YES' ? 'rgba(16,185,129,0.1)' : 'rgba(244,63,94,0.1)', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600 }}>
                               <ArrowUpRight size={14} /> {t.type}
                             </span>
                           ) : (
@@ -178,8 +178,8 @@ export default function SimulationPage() {
                         <td style={{ padding: '1rem', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
                           ${t.amount.toFixed(2)}
                         </td>
-                        <td style={{ padding: '1rem', fontFamily: 'var(--font-mono)', fontWeight: 600, textAlign: 'right', color: t.pnl && t.pnl > 0 ? 'var(--accent-green)' : (t.pnl && t.pnl < 0 ? 'var(--accent-rose)' : 'var(--text-muted)') }}>
-                          {t.pnl !== undefined && t.type === 'SELL' ? (t.pnl > 0 ? `+$${t.pnl.toFixed(2)}` : `-$${Math.abs(t.pnl).toFixed(2)}`) : '-'}
+                        <td style={{ padding: '1rem', fontFamily: 'var(--font-mono)', fontWeight: 600, textAlign: 'right', color: t.pnl !== undefined && t.pnl !== 0 ? (t.pnl > 0 ? 'var(--accent-emerald)' : 'var(--accent-rose)') : 'var(--text-muted)' }}>
+                          {t.pnl !== undefined && t.pnl !== 0 ? (t.pnl > 0 ? `+$${t.pnl.toFixed(2)}` : `-$${Math.abs(t.pnl).toFixed(2)}`) : '-'}
                         </td>
                       </tr>
                     ))}

@@ -196,7 +196,10 @@ def run_simulation():
                 
             for m_id in positions:
                 if m_id in current_prices:
-                    positions[m_id]['last_price'] = current_prices[m_id]
+                    if positions[m_id]['trade_direction'] == "BUY NO":
+                        positions[m_id]['last_price'] = 1.0 - current_prices[m_id] if current_prices[m_id] > 0 else 0.5
+                    else:
+                        positions[m_id]['last_price'] = current_prices[m_id]
                     
             # Calculate Portfolio Value
             portfolio_value = balance + sum(pos['shares'] * pos['last_price'] for pos in positions.values())
@@ -247,13 +250,15 @@ def run_simulation():
                                 "amount_invested": amount
                             }
                             trades.append({
+                                "id": m_id,
                                 "timestamp": timestamp,
                                 "type": trade_direction,
                                 "title": title,
                                 "price": trade_price,
                                 "shares": shares,
                                 "amount": amount,
-                                "pnl": 0.0
+                                "pnl": 0.0,
+                                "status": "OPEN"
                             })
                 
                 # SELL Rule: Take Profit (+30%) or Stop Loss (-20%)
@@ -269,15 +274,23 @@ def run_simulation():
                         pnl = (current_trade_price - buy_price) * pos['shares']
                         balance += pos['amount_invested'] + pnl
                         trades.append({
+                            "id": m_id,
                             "timestamp": timestamp,
                             "type": "SELL",
                             "title": pos['title'],
                             "price": current_trade_price,
                             "shares": pos['shares'],
                             "amount": pos['amount_invested'] + pnl,
-                            "pnl": pnl
+                            "pnl": pnl,
+                            "status": "CLOSED"
                         })
                         del positions[m_id]
+                    
+        # Calculate unrealized PNL for still-open positions
+        for trade in trades:
+            if trade['status'] == "OPEN" and trade['id'] in positions:
+                pos = positions[trade['id']]
+                trade['pnl'] = (pos['last_price'] - pos['buy_price']) * pos['shares']
                     
         return {
             "status": "success", 
