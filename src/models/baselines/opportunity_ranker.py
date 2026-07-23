@@ -32,13 +32,21 @@ class OpportunityRanker:
         self.supervised_model = None
         try:
             client = mlflow.tracking.MlflowClient()
-            # Fetch latest version of the model
-            latest_version = client.get_latest_versions("Polymarket_Supervised_Ranker", stages=["None"])[0].version
-            model_uri = f"models:/Polymarket_Supervised_Ranker/{latest_version}"
-            self.supervised_model = mlflow.sklearn.load_model(model_uri)
-            logger.info(f"Loaded Supervised Model from MLflow (version {latest_version}).")
+            experiment = client.get_experiment_by_name("Polymarket_MLOps")
+            if experiment:
+                runs = client.search_runs(experiment_ids=[experiment.experiment_id], order_by=["start_time DESC"], max_results=1)
+                if runs:
+                    latest_run_id = runs[0].info.run_id
+                    model_uri = f"runs:/{latest_run_id}/model"
+                    self.supervised_model = mlflow.sklearn.load_model(model_uri)
+                    logger.info(f"Loaded Supervised Model from MLflow (Run {latest_run_id}).")
+                else:
+                    logger.info("No runs found in Polymarket_MLOps experiment.")
+            else:
+                logger.info("Experiment Polymarket_MLOps not found.")
         except Exception as e:
-            logger.info("No supervised model found in MLflow yet. Using strictly heuristic baseline.")
+            logger.error(f"Error loading model from MLflow: {e}")
+            logger.info("Using strictly heuristic baseline.")
 
     def _synthesize_target(self, df: pd.DataFrame) -> pd.Series:
         # A heuristic proxy for 'good opportunity'
