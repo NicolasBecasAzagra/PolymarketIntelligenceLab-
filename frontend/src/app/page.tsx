@@ -101,7 +101,7 @@ export default function Dashboard() {
                   {displayTitle}
                   {opp.outcome && (
                     <span style={{ 
-                      color: 'var(--accent-green)', 
+                      color: 'var(--accent-emerald)', 
                       marginLeft: '0.5rem', 
                       background: 'rgba(16,185,129,0.1)', 
                       padding: '2px 8px', 
@@ -116,7 +116,7 @@ export default function Dashboard() {
               </div>
 
               <div className="badges">
-                {displayScore > 70 && (opp.directional_confidence || 50) >= 70 && <span className="badge" style={{backgroundColor: 'var(--accent-green)', color: '#000', fontWeight: 'bold'}}>🟢 BUY YES</span>}
+                {displayScore > 70 && (opp.directional_confidence || 50) >= 70 && <span className="badge" style={{backgroundColor: 'var(--accent-emerald)', color: '#000', fontWeight: 'bold'}}>🟢 BUY YES</span>}
                 {displayScore > 70 && (opp.directional_confidence || 50) <= 30 && <span className="badge" style={{backgroundColor: 'var(--accent-rose)', color: '#fff', fontWeight: 'bold'}}>🔴 BUY NO</span>}
                 {(opp.news_sentiment_score || 0) > 0.2 && <span className="badge bullish">Bullish News</span>}
                 {(opp.news_sentiment_score || 0) < -0.2 && <span className="badge bearish">Bearish News</span>}
@@ -146,7 +146,7 @@ export default function Dashboard() {
                 </div>
                 <div className="metric-pill">
                   <span className="metric-label">Probability (Yes)</span>
-                  <span className="metric-value" style={{color: 'var(--accent-green)'}}>
+                  <span className="metric-value" style={{color: 'var(--accent-emerald)'}}>
                     {opp.yes_price !== undefined ? (opp.yes_price * 100).toFixed(1) + '%' : 'N/A'}
                   </span>
                 </div>
