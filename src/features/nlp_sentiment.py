@@ -15,6 +15,8 @@ class NLPSentimentAnalyzer:
     """
     
     def __init__(self):
+        from dotenv import load_dotenv
+        load_dotenv()
         self.api_key = os.getenv("OPENAI_API_KEY")
         if not self.api_key:
             logger.warning("OPENAI_API_KEY not found. Sentiment will default to 0.0.")
