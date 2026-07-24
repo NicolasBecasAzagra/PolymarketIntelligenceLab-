@@ -64,24 +64,9 @@ def main():
             # Sort by master score
             df = df.sort_values(by="master_score", ascending=False)
             
-            # 4. Generate Research Notes (LLM)
-            logger.info("Generating Research Notes for Top 50 Markets...")
-            generator = ResearchGenerator()
+            # 4. Generate Research Notes (LLM) - DISABLED TO SAVE COSTS
+            logger.info("Research Notes generation is disabled to save OpenAI API costs.")
             df['research_note'] = "Not generated"
-            
-            for i in range(min(50, len(df))):
-                idx = df.index[i]
-                row = df.loc[idx]
-                title = row.get('title', 'Unknown Market')
-                metrics = {
-                    'volume': row.get('volume', 0),
-                    'liquidity': row.get('liquidity', 0),
-                    'velocity_24h': row.get('velocity_24h', 0)
-                }
-                shap_vals = {c: row[c] for c in shap_df.columns} if not shap_df.empty else {}
-                
-                note = generator.generate_note(title, metrics, shap_vals)
-                df.at[idx, 'research_note'] = note
             
             # Log top 1 opportunity score as a metric
             top_score = float(df['master_score'].iloc[0]) if not df.empty else 0.0
